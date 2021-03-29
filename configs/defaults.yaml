@@ -1,0 +1,32 @@
+hydra: 
+  run:
+    # Configure output dir of each experiment programmatically from the arguments
+    # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
+    dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+
+# Global configurations shared between different modules
+experiment: baseline
+
+# Composing nested config with default
+defaults:
+  - datamodule: image_classification
+  - trainer: default_trainer
+  - training: default_training
+  - logging: loggers
+  - optimizer: adamw
+  - scheduler: plateau
+  - model: simple_model
+  - callbacks: callbacks
+  - private: custom
+  - augmentation: basic_augs
+  - loss: cross_entropy
+  - metric: accuracy
+  - inference: basic
+  - hydra/hydra_logging: colorlog
+  - hydra/job_logging: colorlog
+
+general:
+  train_csv_path: '/content/shopee_dataset/train_plus.pkl'
+  val_csv_path: '/content/shopee_dataset/train_plus.pkl'
+  test_csv_path: '/content/shopee_dataset/train_plus.pkl'
+

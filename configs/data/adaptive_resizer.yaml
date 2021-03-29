@@ -1,0 +1,7 @@
+name: adaptive_resize
+
+__target__: project.data.AdaptiveResizerDataModule
+text_max_length: 16
+text_padding: 'longest'
+is_truncate: True
+image_dir: '/content/shopee_dataset/train_images'

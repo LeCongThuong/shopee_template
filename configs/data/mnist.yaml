@@ -1,0 +1,9 @@
+name: mnist
+
+_target_: project.data.MNISTDataModule
+data_dir: ~/datasets/MNIST/  # Use absolute path
+batch_size: 4
+num_workers: 2
+
+input_dim: 784
+output_dim: 10

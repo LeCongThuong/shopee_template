@@ -1,0 +1,4 @@
+_target_: torch.optimizer.SGD
+lr: 1e-3
+momentum: 0.99
+
