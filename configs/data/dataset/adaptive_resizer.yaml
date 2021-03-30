@@ -8,9 +8,9 @@ train:
     image_dir: ${data.image_dir}
     csv_annotation_file: '/content/shopee_dataset/train_plus.pkl'
     transform:
-      target_: project.augmentation.AlbumentationAugment
+      _target_: project.augmentation.AlbumentationAugment
     text_preprocess:
-      __target__: project.text_preprocess.TextProcessing
+      _target_: project.text_preprocess.TextProcessing
     tokenizer_str: 'bert-base-uncased'
     text_max_length: 16
     text_padding: 'longest'

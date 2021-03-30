@@ -88,7 +88,7 @@ class BaselineModel(pl.LightningModule):
             with torch.no_grad():
                 images_batch, title_ids, attention_masks, _ = self.squeeze_dim(batch)
                 images_batch, title_ids, attention_masks = images_batch.to(device=device), title_ids.to(device=device), attention_masks.to(device)
-                embedding, _ = self(images_batch, title_ids, attention_masks)
+                embedding = self(images_batch, title_ids, attention_masks)
             embedding_list.append(embedding)
         return embedding_list
 

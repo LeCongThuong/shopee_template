@@ -91,6 +91,17 @@ class ShopeeDatasetLoader:
     def get_dataloader(self, sampler):
         return DataLoader(self.dataset, sampler=sampler)
 
+    def get_sampler(self, sampler_str, dataset):
+        if sampler_str == 'random':
+            sampler = torch.utils.data.sampler.BatchSampler(torch.utils.data.sampler.RandomSampler(dataset),
+                                                            batch_size=self.batch_size, drop_last=False)
+        elif sampler_str == 'sequence':
+            sampler = torch.utils.data.sampler.BatchSampler(torch.utils.data.sampler.SequentialSampler(dataset),
+                                                            batch_size=self.batch_size, drop_last=False)
+        else:
+            raise Exception("Type of sampler is not valid")
+        return sampler
+
     def show_images(self):
         sampler = torch.utils.data.sampler.BatchSampler(
             torch.utils.data.sampler.RandomSampler(self.adaptiveResizerDataModule),
