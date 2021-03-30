@@ -1,0 +1,11 @@
+name: efficientnetb0_bert
+
+__target__: project.model.BaselineModel
+arch: 'efficientnet-b0'
+out_feature: 512
+dropout_ratio: 0.2
+model_name: 'bert-base-uncased'
+
+defaults:
+  - optim/adam
+  - loss/triplet_margin

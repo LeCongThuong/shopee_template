@@ -1,0 +1,16 @@
+# @package _group_
+loss_func:
+  _target_: pytorch_metric_learning.TripletMarginLoss
+  margin: 0.2
+  distance:
+    _target_: pytorch_metric_learning.distances.CosineSimilarity
+  reducer:
+    _target_: pytorch_metric_learning.reducers.ThresholdReducer
+    low: 0
+
+mining_func:
+  _target_: pytorch_metric_learning.miners.TripletMarginMiner
+  margin: 0.2
+  distance:
+    _target_: pytorch_metric_learning.distances.CosineSimilarity
+  type_of_triplets: semihard

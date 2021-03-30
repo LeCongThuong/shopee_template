@@ -1,15 +1,10 @@
 import pytorch_lightning as pl
 import torch
-from torch.nn import functional as F
+import hydra
 from efficientnet_pytorch import EfficientNet
 import torch.nn as nn
 from transformers import AutoModel
-from torch.utils.data import DataLoader
-from transformers import AutoTokenizer
-from pytorch_metric_learning import losses, miners, distances, reducers, testers
 from project.utils import read_csv
-from tqdm import tqdm
-import gc
 import numpy as np
 import pandas as pd
 import faiss
@@ -46,16 +41,15 @@ class BertBaseCaseModel(pl.LightningModule):
 
 
 class BaselineModel(pl.LightningModule):
-    def __init__(self, arch='efficientnet-b0', out_feature=512, dropout_ratio=0.2, tokenizer_str='bert-base-cased',  model_name='bert-base-cased'):
+    def __init__(self, optim, loss, arch='efficientnet-b0', out_feature=512, dropout_ratio=0.2,  model_name='bert-base-cased'):
         super().__init__()
         self.save_hyperparameters()
         self.image_extractor = EfficientnetModel(arch=arch, out_feature=out_feature, dropout_ratio=dropout_ratio)
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_str)
-        self.distance, self.reducer, self.loss_func, self.mining_func = self.get_loss_funcs()
+        self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image,
-                title_ids,# Indices of input sequence tokens in the vocabulary.
+                title_ids, # Indices of input sequence tokens in the vocabulary.
                 attention_mask=None, # Mask to avoid performing attention on padding token indices
                 ):
         image_embedding = self.image_extractor(image)
@@ -74,11 +68,9 @@ class BaselineModel(pl.LightningModule):
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
 
     def get_loss_funcs(self):
-        distance = distances.CosineSimilarity()
-        reducer = reducers.ThresholdReducer(low=0)
-        loss_func = losses.TripletMarginLoss(margin=0.2, distance=distance, reducer=reducer)
-        mining_func = miners.TripletMarginMiner(margin=0.2, distance=distance, type_of_triplets="semihard")
-        return distance, reducer, loss_func, mining_func
+        loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
+        mining_func = hydra.utils.instantiate(self.hparams.loss.mining_func)
+        return loss_func, mining_func
 
     def evaluate_train_dataset(self, val_dataloader, csv_file, topk, device):
         embedding_list = self.get_all_embeddings(val_dataloader, device)
@@ -153,7 +145,7 @@ class BaselineModel(pl.LightningModule):
         return 2 * n / (len(neighbor_pred) + len(target))
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.0005)
+        return hydra.utils.instantiate(self.hparams.optim, self.parameters())
 
     def squeeze_dim(self, batch):
         image_batch = batch["images"]
@@ -167,14 +159,6 @@ class BaselineModel(pl.LightningModule):
             if label_groups is not None:
                 label_groups = torch.squeeze(torch.squeeze(label_groups), 0)
         return images_batch, title_ids, attention_masks, label_groups
-
-    def get_callbacks(self):
-        callbacks = [
-            pl.callbacks.ModelCheckpoint(monitor='loss/train_step', dirpath='my/path', filename='{epoch}-{step}-{loss/train_step:.2f}', mode='min',
-                                         every_n_train_steps=2000, period=2, save_last=True),
-            pl.callbacks.EarlyStopping(monitor='loss/train_step', patience=50),
-        ]
-        return callbacks
 
     def load_model(self):
         model = BaselineModel.load_from_checkpoint('my/path', hparams_file='/path/to/hparams_file.yaml')

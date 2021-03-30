@@ -1,0 +1,7 @@
+
+__target__: pytorch_lightning.loggers.TensorBoardLogger
+save_dir: '.'
+name: 'default'
+log_graph: True
+version: ''
+default_hp_metric: True

@@ -7,12 +7,13 @@ import cv2
 import torch
 import matplotlib.pyplot as plt
 from project.utils import read_csv
+from transformers import AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
 
 class AdaptiveResizerDataset(Dataset):
-    def __init__(self, image_dir, csv_annotation_file, transform, text_preprocess, tokenizer, text_max_length, text_padding='longest',
+    def __init__(self, image_dir, csv_annotation_file, transform, text_preprocess, tokenizer_str, text_max_length, text_padding='longest',
                  is_truncate=True, do_train=True,  **kwargs):
         self.do_train = do_train
         self.image_dir = image_dir
@@ -20,7 +21,7 @@ class AdaptiveResizerDataset(Dataset):
         self.text_process = text_preprocess
         self.image_path_list, self.image_size_list, self.title_list, self.label_group_list = self.set_up(image_dir, csv_annotation_file)
         self.transform = transform
-        self.tokenizer = tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_str)
         self.text_max_length = text_max_length
         self.text_padding = text_padding
         self.is_truncate = is_truncate
@@ -83,25 +84,12 @@ class AdaptiveResizerDataset(Dataset):
 
 
 class ShopeeDatasetLoader:
-    def __init__(self, batch_size, sampler_str, dataset):
+    def __init__(self, dataset, batch_size):
         self.batch_size = batch_size
-        self.sampler_str = sampler_str
         self.dataset = dataset
 
-    def get_dataloder(self):
-        sampler = self.get_sampler(self.sampler_str, self.dataset)
+    def get_dataloader(self, sampler):
         return DataLoader(self.dataset, sampler=sampler)
-
-    def get_sampler(self, sampler_str, dataset):
-        if sampler_str == 'random':
-            sampler = torch.utils.data.sampler.BatchSampler(torch.utils.data.sampler.RandomSampler(dataset),
-                                                            batch_size=self.batch_size, drop_last=False)
-        elif sampler_str == 'sequence':
-            sampler = torch.utils.data.sampler.BatchSampler(torch.utils.data.sampler.SequentialSampler(dataset),
-                                                            batch_size=self.batch_size, drop_last=False)
-        else:
-            raise Exception("Type of sampler is not valid")
-        return sampler
 
     def show_images(self):
         sampler = torch.utils.data.sampler.BatchSampler(

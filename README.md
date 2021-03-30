@@ -120,12 +120,12 @@ $ python main.py model=autoencoder data=cifar trainer.gpus=4
 
 In python, the module will be instantiated by a line, for example `data_module = hydra.utils.instantiate(cfg.data)`.
 
-`cfg.data` is a `DictConfig` object created by `hydra` at runtime, and is stored in a config file, for example [`configs/data/mnist.yaml`](configs/data/mnist.yaml):
+`cfg.data` is a `DictConfig` object created by `hydra` at runtime, and is stored in a config file, for example [`configs/data/mnist.yaml`](configs/dataset/mnist.yaml):
 ```yaml
 name: mnist
 
 # _target_ class to instantiate
-_target_: project.data.MNISTDataModule
+_target_: project.dataset.MNISTDataModule
 # Argument to feed into __init__() of target module
 data_dir: ~/datasets/MNIST/  # Use absolute path
 batch_size: 4
@@ -153,7 +153,7 @@ hydra:
   run:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
-    dir: outputs/${data.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${dataset.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
 ```
 and tell `TensorBoardLogger()` to use the current working directory without adding anything:
 ```python

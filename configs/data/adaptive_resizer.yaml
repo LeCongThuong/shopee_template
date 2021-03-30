@@ -1,7 +1,21 @@
-name: adaptive_resize
+# %package _group_
 
-__target__: project.data.AdaptiveResizerDataModule
-text_max_length: 16
-text_padding: 'longest'
-is_truncate: True
-image_dir: '/content/shopee_dataset/train_images'
+name: adaptive_loader
+
+train:
+  _target_: project.data.ShopeeDatasetLoader
+  dataset:
+    do_train: true
+  batch_size: 1
+
+val:
+  _target_: project.data.ShopeeDatasetLoader
+  dataset:
+    do_train: true
+  batch_size: 1
+
+test:
+  _target_: project.data.ShopeeDatasetLoader
+  dataset:
+    do_train: false
+  batch_size: 1

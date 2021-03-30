@@ -1,0 +1,3 @@
+name: text_preprocess
+
+__target__: project.text_preprocess.TextProcessing
