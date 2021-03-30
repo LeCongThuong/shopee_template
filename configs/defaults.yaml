@@ -2,7 +2,7 @@ hydra:
   run:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
-    dir: outputs/${dataset.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
+    dir: outputs/${data.dataset.name}/${model.name}/${experiment}/${now:%Y-%m-%d_%H%M%S}
 
 # Global configurations shared between different modules
 experiment: baseline
@@ -13,11 +13,12 @@ defaults:
   - data/dataset@data: adaptive_resizer
   - data/sampler: adaptive_resizer
   - model: efficientnetb0_bert
+  - loss@model.loss: triplet_margin
+  - optim@model.optim: adam
   - logging: tensorboard
   - trainer: default_trainer
-  - hydra/hydra_logging: colorlog
-  - hydra/job_logging: colorlog
-  - optimizer: adam
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
 
 general:
   topk: 50

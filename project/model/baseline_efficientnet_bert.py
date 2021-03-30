@@ -41,7 +41,7 @@ class BertBaseCaseModel(pl.LightningModule):
 
 
 class BaselineModel(pl.LightningModule):
-    def __init__(self, optim, loss, arch='efficientnet-b0', out_feature=512, dropout_ratio=0.2,  model_name='bert-base-cased'):
+    def __init__(self, optim, loss, arch='efficientnet-b0', out_feature=512, dropout_ratio=0.2,  model_name='bert-base-cased', **kwargs):
         super().__init__()
         self.save_hyperparameters()
         self.image_extractor = EfficientnetModel(arch=arch, out_feature=out_feature, dropout_ratio=dropout_ratio)

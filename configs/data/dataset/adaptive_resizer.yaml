@@ -1,11 +1,11 @@
 # @package _group_
 name: adaptive_dataset
-image_dir: '/content/shopee_dataset/image'
+image_dir: '/content/shopee_dataset/train_images'
 
 train:
   dataset:
-    _target_: project.dataset.AdaptiveResizerDataModule
-    image_dir: ${image_dir}
+    _target_: project.data.AdaptiveResizerDataModule
+    image_dir: ${data.image_dir}
     csv_annotation_file: '/content/shopee_dataset/train_plus.pkl'
     transform:
       target_: project.augmentation.AlbumentationAugment
@@ -18,8 +18,8 @@ train:
 
 val:
   dataset:
-    _target_: project.dataset.AdaptiveResizerDataModule
-    image_dir: ${image_dir}
+    _target_: project.data.AdaptiveResizerDataset
+    image_dir: ${data.image_dir}
     csv_annotation_file: '/content/shopee_dataset/train_plus.pkl'
     transform: null
     text_preprocess:
@@ -31,8 +31,9 @@ val:
 
 test:
   dataset:
-    _target_: project.dataset.AdaptiveResizerDataModule
-    image_dir: ${image_dir}
+    _target_: project.data.AdaptiveResizerDataset
+    image_dir: ${data.image_dir}
+    csv_annotation_file: '/content/shopee_dataset/train_plus.pkl'
     transform: null
     text_preprocess:
        _target_: project.text_preprocess.TextProcessing

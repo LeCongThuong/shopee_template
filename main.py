@@ -60,6 +60,8 @@ def main(cfg: DictConfig) -> None:
     # trainer = Trainer(resume_from_checkpoint='some/path/to/my_checkpoint.ckpt')
     # model_module.predict_test_dataset(test_loader, test_csv_path, output_file_path, topk, device)
 
+if __name__ == "__main__":
+    main()
 
 
 
