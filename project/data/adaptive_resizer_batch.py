@@ -35,23 +35,22 @@ class AdaptiveResizerDataset(Dataset):
         title = self.title_list[idx]
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = np.transpose(image, (2, 0, 1))
-
         # transform data
         image = self.transform(image)["image"]
+        image = np.transpose(image, (2, 0, 1))
         title = self.text_process(title)
 
         tokenized = self.tokenizer([title], padding=self.text_padding, truncation=self.is_truncate, max_length=self.text_max_length,
                                    return_tensors="pt")
 
         if not self.do_train:
-            return {"image": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"]),
-                    "attention_mask": torch.as_tensor(tokenized["attention_mask"])}
+            return {"image": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
+                    "attention_mask": torch.as_tensor(tokenized["attention_mask"][0])}
 
         label_group = self.label_group_list[idx]
 
-        return {"image": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"]),
-                "attention_mask": torch.as_tensor(tokenized["attention_mask"]), "label_group": torch.as_tensor(label_group)}
+        return {"images": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
+                "attention_masks": torch.as_tensor(tokenized["attention_mask"][0]), "label_groups": torch.as_tensor(label_group)}
 
     def set_up(self, image_dir, csv_file):
         df = read_csv(csv_file)
@@ -62,16 +61,16 @@ class AdaptiveResizerDataset(Dataset):
             return image_path_list, title_list, None
         return image_path_list, title_list, df['label_group'].to_numpy()
 
-    def collate_fn(self, batch):
-        title_ids = torch.stack([x["title_ids"] for x in batch])
-        attention_masks = torch.stack(x['attention_mask'] for x in batch)
-        mean_image_size = get_mean_batch_image_size(batch)
-        resize_op = torchvision.transforms.Resize(size=mean_image_size)
-        images = torch.stack([resize_op(x['image']) for x in batch])
-        if not self.do_train:
-            return {"title_ids": title_ids, "attention_masks": attention_masks, "images": images}
-        label_groups = torch.stack(x['label_group'] for x in batch)
-        return {"title_ids": title_ids, "attention_masks": attention_masks, "images": images, "label_groups": label_groups}
+    # def collate_fn(self, batch):
+    #     title_ids = torch.stack([x["title_ids"] for x in batch])
+    #     attention_masks = torch.stack([x['attention_mask'] for x in batch])
+    #     mean_image_size = get_mean_batch_image_size(batch)
+    #     resize_op = torchvision.transforms.Resize(size=mean_image_size)
+    #     images = torch.stack([resize_op(x['image']) for x in batch])
+    #     if not self.do_train:
+    #         return {"title_ids": title_ids, "attention_masks": attention_masks, "images": images}
+    #     label_groups = torch.stack(x['label_group'] for x in batch)
+    #     return {"title_ids": title_ids, "attention_masks": attention_masks, "images": images, "label_groups": label_groups}
 
 
 class ShopeeDatasetLoader:

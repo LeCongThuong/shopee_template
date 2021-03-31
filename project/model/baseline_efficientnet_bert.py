@@ -22,8 +22,7 @@ class EfficientnetModel(pl.LightningModule):
         self.fc = nn.Linear(self.base._fc.in_features, out_feature)
 
     def forward(self, x):
-        out = torch.transpose(x, -1, 1)
-        out = self.base.extract_features(out)
+        out = self.base.extract_features(x)
         out = self.adaptive_pooling(out)
         out = self.drop_out(out)
         out = self.flatten(out)
