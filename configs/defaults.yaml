@@ -9,9 +9,9 @@ experiment: baseline
 
 # Composing nested config with default
 defaults:
-  - data: adaptive_resizer
-  - data/dataset@data: adaptive_resizer
-  - data/sampler: adaptive_resizer
+  - data_dataset: adaptive_resizer
+  - data_sampler: random_sampler
+  - dataloader: shopee_loader
   - model: efficientnetb0_bert
   - loss@model.loss: triplet_margin
   - optim@model.optim: adam

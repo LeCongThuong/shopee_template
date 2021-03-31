@@ -49,15 +49,15 @@ class BaselineModel(pl.LightningModule):
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image,
-                title_ids, # Indices of input sequence tokens in the vocabulary.
-                attention_mask=None, # Mask to avoid performing attention on padding token indices
+                title_ids,
+                attention_mask=None,
                 ):
         image_embedding = self.image_extractor(image)
         text_embedding = self.text_extractor(title_ids, attention_mask)
         return torch.cat([image_embedding, text_embedding], dim=1)
 
     def _step(self, batch):
-        images_batch, title_ids, attention_masks, label_group = self.squeeze_dim(batch)
+        images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
         embedding = self(images_batch, title_ids, attention_masks)
         return embedding, label_group
 
@@ -147,18 +147,12 @@ class BaselineModel(pl.LightningModule):
     def configure_optimizers(self):
         return hydra.utils.instantiate(self.hparams.optim, self.parameters())
 
-    def squeeze_dim(self, batch):
-        image_batch = batch["images"]
+    def extract_input(self, batch):
+        images = batch["images"]
         title_ids = batch["title_ids"]
         label_groups = batch.get("label_groups", None)
         attention_masks = batch["attention_masks"]
-        if len(image_batch.size()) > 4:
-            images_batch = torch.squeeze(image_batch, 0)
-            title_ids = torch.squeeze(title_ids, 0)
-            attention_masks = torch.squeeze(attention_masks, 0)
-            if label_groups is not None:
-                label_groups = torch.squeeze(torch.squeeze(label_groups), 0)
-        return images_batch, title_ids, attention_masks, label_groups
+        return images, title_ids, attention_masks, label_groups
 
     def load_model(self):
         model = BaselineModel.load_from_checkpoint('my/path', hparams_file='/path/to/hparams_file.yaml')

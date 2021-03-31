@@ -1,0 +1,38 @@
+# @package data_dataset
+
+train:
+  _target_: project.data.AdaptiveResizerDataModule
+  csv_file: '/content/shopee_dataset/train_plus.pkl'
+  image_dir: '/content/shopee_dataset/train_images'
+  transform:
+    _target_: project.augmentation.AlbumentationAugment
+  text_preprocess:
+    _target_: project.text_preprocess.TextProcessing
+  tokenizer_str: 'bert-base-uncased'
+  text_max_length: 16
+  text_padding: 'longest'
+  is_truncate: True
+
+val:
+  _target_: project.data.AdaptiveResizerDataset
+  csv_file: '/content/shopee_dataset/train_plus.pkl'
+  image_dir: '/content/shopee_dataset/train_images'
+  transform: null
+  text_preprocess:
+    _target_: project.text_preprocess.TextProcessing
+  tokenizer_str: 'bert-base-uncased'
+  text_max_length: 16
+  text_padding: 'longest'
+  is_truncate: True
+
+test:
+  csv_file: '/content/shopee_dataset/train_plus.pkl'
+  _target_: project.data.AdaptiveResizerDataset
+  image_dir: '/content/shopee_dataset/train_images'
+  transform: null
+  text_preprocess:
+     _target_: project.text_preprocess.TextProcessing
+  tokenizer_str: 'bert-base-uncased'
+  text_max_length: 16
+  text_padding: 'longest'
+  is_truncate: True
