@@ -1,3 +1,4 @@
+# @package model
 name: efficientnetb0_bert
 
 _target_: project.model.BaselineModel

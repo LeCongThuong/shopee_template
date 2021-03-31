@@ -1,13 +1,13 @@
 # @package data_sampler
 
 train:
-  _target_: torch.utils.data.sampler.RandomSampler
+  _target_: torch.utils.data.SequentialSampler
   data_source: ${data_dataset.train}
 
 val:
-  _target_: torch.utils.data.sampler.SequentialSampler
+  _target_: torch.utils.data.SequentialSampler
   data_source: ${data_dataset.val}
 
 test:
-  _target_: torch.utils.data.sampler.SequentialSampler
-  data_source: ${data_dataset.val}
+  _target_: torch.utils.data.SequentialSampler
+  data_source: ${data_dataset.test}

@@ -1,3 +1,4 @@
+# @package optim
 _target_: torch.optim.Adam
 lr: 3e-4
 

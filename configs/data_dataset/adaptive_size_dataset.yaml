@@ -1,7 +1,7 @@
 # @package data_dataset
-
+name: adaptive_size_dataset
 train:
-  _target_: project.data.AdaptiveResizerDataModule
+  _target_: project.data.AdaptiveResizerDataset
   csv_file: '/content/shopee_dataset/train_plus.pkl'
   image_dir: '/content/shopee_dataset/train_images'
   transform:
@@ -31,7 +31,7 @@ test:
   image_dir: '/content/shopee_dataset/train_images'
   transform: null
   text_preprocess:
-     _target_: project.text_preprocess.TextProcessing
+    _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
   text_max_length: 16
   text_padding: 'longest'
