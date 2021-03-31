@@ -6,11 +6,13 @@ train:
   image_dir: '/content/shopee_dataset/train_images'
   transform:
     _target_: project.augmentation.AlbumentationAugment
+    height: 448
+    width: 448
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
   text_max_length: 16
-  text_padding: 'longest'
+  text_padding: 'max_length'
   is_truncate: True
 
 val:
@@ -22,7 +24,7 @@ val:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
   text_max_length: 16
-  text_padding: 'longest'
+  text_padding: 'max_length'
   is_truncate: True
 
 test:
@@ -34,5 +36,5 @@ test:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
   text_max_length: 16
-  text_padding: 'longest'
+  text_padding: 'max_length'
   is_truncate: True
