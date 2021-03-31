@@ -56,7 +56,7 @@ def main(cfg: DictConfig) -> None:
 
     model_module.to(device)
     trainer.fit(model_module, train_dataloader=train_loader)
-    model_module.evaluate_train_dataset(val_loader, cfg.data.val.dataset.csv_annotation_file, cfg.general.topk, device)
+    model_module.evaluate_train_dataset(val_loader, cfg.data.val.csv_file, cfg.general.topk, device)
 
     # for restore continue training
     # trainer = Trainer(resume_from_checkpoint='some/path/to/my_checkpoint.ckpt')
