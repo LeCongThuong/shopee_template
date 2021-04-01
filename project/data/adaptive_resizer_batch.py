@@ -36,8 +36,8 @@ class AdaptiveResizerDataset(Dataset):
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # transform data
-        image = self.transform(image)["image"]
-
+        if self.do_train:
+            image = self.transform(image)["image"]
         image = np.transpose(image, (2, 0, 1))
         title = self.text_process(title)
 
