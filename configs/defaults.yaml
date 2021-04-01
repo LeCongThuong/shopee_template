@@ -10,7 +10,7 @@ experiment: baseline
 # Composing nested config with default
 defaults:
   - data_dataset: adaptive_size_dataset
-  - data_sampler: random_sampler
+  - data_sampler: m_per_class_sampler
   - data_image_aug: albumentation_aug
   - data_loader: shopee_loader
   - model: efficientnetb0_bert
