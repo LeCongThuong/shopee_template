@@ -1,4 +1,4 @@
-# @package _group_
+# @package data_image_aug
 name: image_augment
 
 train:
