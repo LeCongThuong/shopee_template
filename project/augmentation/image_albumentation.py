@@ -34,4 +34,4 @@ class AlbumentationAugment:
         ])
 
     def __call__(self, image):
-        return self.transform(image=image)
+        return self.transform(image=image)["image"]
