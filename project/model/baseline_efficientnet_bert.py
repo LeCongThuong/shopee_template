@@ -8,6 +8,7 @@ from project.utils import read_csv
 import numpy as np
 import pandas as pd
 import faiss
+from tqdm import tqdm
 
 
 class EfficientnetModel(pl.LightningModule):
@@ -83,9 +84,9 @@ class BaselineModel(pl.LightningModule):
     def get_all_embeddings(self, dataloader, device):
         embedding_list = []
         self.eval()
-        for batch_idx, batch in enumerate(dataloader):
+        for batch_idx, batch in enumerate(tqdm(dataloader, total=int(len(dataloader)))):
             with torch.no_grad():
-                images_batch, title_ids, attention_masks, _ = self.squeeze_dim(batch)
+                images_batch, title_ids, attention_masks, _ = self.extract_input(batch)
                 images_batch, title_ids, attention_masks = images_batch.to(device=device), title_ids.to(device=device), attention_masks.to(device)
                 embedding = self(images_batch, title_ids, attention_masks)
             embedding_list.append(embedding)
