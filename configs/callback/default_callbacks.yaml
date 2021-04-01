@@ -6,7 +6,7 @@ model_checkpoint:
   monitor: loss/train_step
   filename: '{epoch}-{step}-{loss/train_step:.2f}'
   mode: min
-  period: 1
+  period: 2
   save_last: true
 
 early_stop:
