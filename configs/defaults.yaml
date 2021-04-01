@@ -16,6 +16,7 @@ defaults:
   - model: efficientnetb0_bert
   - loss@model.loss: triplet_margin
   - optim@model.optim: adam
+  - callback: default_callbacks
   - logging: tensorboard
   - trainer: default_trainer
   - override hydra/hydra_logging: colorlog

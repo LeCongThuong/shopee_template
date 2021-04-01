@@ -1,4 +1,4 @@
-# @package _group_
+# @package trainer
 
 # Pytorch lightning trainer's argument
 # default flags are commented to avoid clustering the hyperparameters

@@ -10,6 +10,6 @@ model_checkpoint:
   save_last: true
 
 early_stop:
-  _target_: pytorch_lighting.callbacks.EarlyStopping
+  _target_: pytorch_lightning.callbacks.early_stopping.EarlyStopping
   monitor: loss/train_step
   patience: 50
