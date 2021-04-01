@@ -18,7 +18,16 @@ def main(cfg: DictConfig) -> None:
 
     model_module = hydra.utils.instantiate(cfg.model, _recursive_=False)
 
-    train_loader = hydra.utils.instantiate(cfg.data_loader.train).get_dataloader()
+    train_dataset = hydra.utils.instantiate(cfg.data_dataset.train)
+
+    train_sampler = hydra.utils.instantiate(cfg.data_sampler.train,
+                                            labels=train_dataset.label_group_list,
+                                            length_before_new_iter=len(train_dataset.label_group_list))
+
+    train_loader = hydra.utils.instantiate(cfg.data_loader.train,
+                                           dataset=train_dataset,
+                                           sampler=train_sampler).get_dataloader()
+
     val_loader = hydra.utils.instantiate(cfg.data_loader.val).get_dataloader()
     # test_loader = hydra.utils.instantiate(cfg.data_loader.test).get_dataloader()
 

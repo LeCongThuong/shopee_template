@@ -1,0 +1,15 @@
+# @package data_sampler
+
+train:
+  _target_: pytorch_metric_learning.losses.samplers
+  labels: ???
+  m: 2
+  length_before_new_iter: ???
+
+val:
+  _target_: torch.utils.data.SequentialSampler
+  data_source: ${data_dataset.val}
+
+test:
+  _target_: torch.utils.data.SequentialSampler
+  data_source: ${data_dataset.test}

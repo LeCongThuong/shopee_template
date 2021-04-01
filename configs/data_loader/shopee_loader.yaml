@@ -2,9 +2,9 @@
 
 train:
   _target_: project.data.ShopeeDatasetLoader
-  batch_size: 16
-  dataset: ${data_dataset.train}
-  sampler: ${data_sampler.train}
+  batch_size: 32
+  dataset: ???
+  sampler: ???
 
 val:
   _target_: project.data.ShopeeDatasetLoader
