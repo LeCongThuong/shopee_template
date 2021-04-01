@@ -2,9 +2,9 @@ import albumentations as A
 
 
 class AlbumentationAugment:
-    def __init__(self, height, width):
+    def __init__(self, height, width, **kwargs):
         self.transform = A.Compose([
-            A.augmentations.geometric.resize.Resize(height, width),
+            A.Resize(height, width),
             A.OneOf([
                 A.IAAAdditiveGaussianNoise(),
                 A.GaussNoise(),

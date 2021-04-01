@@ -4,10 +4,7 @@ train:
   _target_: project.data.AdaptiveResizerDataset
   csv_file: '/content/shopee_dataset/train_plus.pkl'
   image_dir: '/content/shopee_dataset/train_images'
-  transform:
-    _target_: project.augmentation.AlbumentationAugment
-    height: 448
-    width: 448
+  transform: ${data_image_aug}
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'

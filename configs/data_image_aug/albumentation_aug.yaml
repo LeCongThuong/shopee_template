@@ -2,3 +2,5 @@
 name: image_augment
 
 _target_: project.augmentation.AlbumentationAugment
+height: 448
+width: 448
