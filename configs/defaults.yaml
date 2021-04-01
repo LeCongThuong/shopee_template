@@ -24,4 +24,3 @@ defaults:
 general:
   topk: 50
   seed: 1234
-

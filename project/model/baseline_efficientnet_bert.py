@@ -153,7 +153,10 @@ class BaselineModel(pl.LightningModule):
         attention_masks = batch["attention_masks"]
         return images, title_ids, attention_masks, label_groups
 
-    def load_model(self):
-        model = BaselineModel.load_from_checkpoint('my/path', hparams_file='/path/to/hparams_file.yaml')
+    def load_model(self, checkpoint_path, hparams_file=None):
+        if hparams_file is None:
+            model = BaselineModel.load_from_checkpoint(checkpoint_path, hparams_file='log_and_param/hparams.yaml')
+        else:
+            model = BaselineModel.load_from_checkpoint(checkpoint_path, hparams_file)
         return model
 

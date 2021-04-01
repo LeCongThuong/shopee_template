@@ -33,13 +33,18 @@ def main(cfg: DictConfig) -> None:
 
     tensorboard = hydra.utils.instantiate(cfg.logging)
 
+    # callbacks = [
+    #     pl.callbacks.ModelCheckpoint(monitor='loss/train_step',
+    #                                  dirpath='checkpoints',
+    #                                  filename='{epoch}  -{step}-{loss/train_step:.2f}',
+    #                                  mode='min',
+    #                                  period=2,
+    #                                  save_last=True),
+    #     pl.callbacks.EarlyStopping(monitor='loss/train_step', patience=50),
+    # ]
     callbacks = [
-        pl.callbacks.ModelCheckpoint(monitor='loss/train_step', dirpath='my/path',
-                                     filename='{epoch}-{step}-{loss/train_step:.2f}',
-                                     mode='min',
-                                     period=2,
-                                     save_last=True),
-        pl.callbacks.EarlyStopping(monitor='loss/train_step', patience=50),
+        hydra.utils.instantiate(cfg.callback.model_checkpoint),
+        hydra.utils.instantiate(cfg.callback.early_stop)
     ]
 
     trainer = pl.Trainer(

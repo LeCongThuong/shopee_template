@@ -1,0 +1,15 @@
+# @package callback
+
+model_checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  dirpath: checkpoints
+  monitor: loss/train_step
+  filename: '{epoch}-{step}-{loss/train_step:.2f}'
+  mode: min
+  period: 2
+  save_last: true
+
+early_stop:
+  _target_: pytorch_lighting.callbacks.EarlyStopping
+  monitor: loss/train_step
+  patience: 50

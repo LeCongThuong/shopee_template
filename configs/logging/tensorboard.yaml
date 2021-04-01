@@ -1,7 +1,7 @@
 # @package logging
 _target_: pytorch_lightning.loggers.TensorBoardLogger
 save_dir: '.'
-name: 'default'
+name: 'log_and_param'
 log_graph: true
 version: ''
 default_hp_metric: false
