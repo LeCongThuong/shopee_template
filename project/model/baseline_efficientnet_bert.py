@@ -20,14 +20,14 @@ class EfficientnetModel(pl.LightningModule):
         self.adaptive_pooling = nn.AdaptiveAvgPool2d(output_size=1)
         self.drop_out = nn.Dropout(p=dropout_ratio, inplace=False)
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(self.base._fc.in_features, out_feature)
+        # self.fc = nn.Linear(self.base._fc.in_features, out_feature)
 
     def forward(self, x):
         out = self.base.extract_features(x)
         out = self.adaptive_pooling(out)
         out = self.drop_out(out)
         out = self.flatten(out)
-        out = self.fc(out)
+        # out = self.fc(out)
         return out
 
 
