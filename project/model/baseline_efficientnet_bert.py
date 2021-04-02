@@ -119,10 +119,10 @@ class BaselineModel(pl.LightningModule):
         mining_func = hydra.utils.instantiate(self.hparams.loss.mining_func)
         return loss_func, mining_func
 
-    def evaluate_train_dataset(self, val_dataloader, csv_file, topk, device):
+    def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
         embedding_list = self.get_all_embeddings(val_dataloader, device)
         posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
-        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, topk=topk)
+        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
         f1_score = self.get_f1_dice_score(target_list, k_post_neighbor_pred_list)
         self.log('val/f1_score', f1_score)
         print("Validation: f1_score: ", f1_score)
@@ -135,8 +135,8 @@ class BaselineModel(pl.LightningModule):
             with torch.no_grad():
                 images_batch, title_ids, attention_masks, _ = self.extract_input(batch)
                 images_batch, title_ids, attention_masks = images_batch.to(device=device), title_ids.to(device=device), attention_masks.to(device)
-                embedding = self(images_batch, title_ids, attention_masks)
-            embedding_list.append(embedding)
+                image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
+            embedding_list.append(image_text_embedding)
         return embedding_list
 
     def process_csv_file(self, csv_file, test_mode=False):
@@ -150,10 +150,10 @@ class BaselineModel(pl.LightningModule):
         target_list = df['target'].to_numpy()
         return posting_id_list, target_list
 
-    def predict_test_dataset(self, test_dataloader, csv_file, output_file_path, topk, device) -> None:
+    def predict_test_dataset(self, test_dataloader, csv_file, output_file_path, threshold, device) -> None:
         embedding_list = self.get_all_embeddings(test_dataloader, device)
         posting_id_list, _ = self.process_csv_file(csv_file, test_mode=True)
-        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, topk=topk)
+        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
         self.write_to_csv(posting_id_list, k_post_neighbor_pred_list, output_file_path)
 
     def write_to_csv(self, posting_id_list, k_post_neighbor_pred_list, output_file_path):
@@ -162,18 +162,21 @@ class BaselineModel(pl.LightningModule):
         df = pd.DataFrame(submit_dict, columns=['posting_id', 'matches'])
         df.to_csv(output_file_path, index=False)
 
-    def get_k_neighbors(self, embeddings, posting_ids_list, topk=50):
+    def get_k_neighbors(self, embeddings, posting_ids_list, threshold=0.8):
         embeddings = torch.cat(embeddings)
         embeddings = embeddings.detach().cpu().numpy()
         embedding_num, D = embeddings.shape
-        cpu_index = faiss.IndexFlatL2(D)
+        cpu_index = faiss.IndexFlatIP(D)
         gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
+        faiss.normalize_L2(embeddings)
         gpu_index.add(embeddings)
-        dists, ids = gpu_index.search(x=embeddings, k=topk)
+        dists, ids = gpu_index.search(embeddings, embedding_num)
+        boolean_k_neighbors = dists > threshold
         k_neighbor_list = []
         for i in range(embedding_num):
-            k_neighbor_list.append(np.take(posting_ids_list, ids[i, :]))
-        k_neighbor_pred = np.vstack(k_neighbor_list)
+            k_neighbor_position = ids[i][boolean_k_neighbors[i]]
+            k_neighbor_list.append(np.take(posting_ids_list, k_neighbor_position))
+        k_neighbor_pred = np.array(k_neighbor_list)
         return k_neighbor_pred
 
     def get_f1_dice_score(self, targets, neighbor_preds):

@@ -7,6 +7,8 @@ loss_func:
   reducer:
     _target_: pytorch_metric_learning.reducers.ThresholdReducer
     low: 0
+  swap: true
+  smooth_loss: true
 
 mining_func:
   _target_: pytorch_metric_learning.miners.TripletMarginMiner

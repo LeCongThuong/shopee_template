@@ -23,5 +23,5 @@ defaults:
   - override hydra/job_logging: colorlog
 
 general:
-  topk: 50
+  threshold: 0.8
   seed: 1234
