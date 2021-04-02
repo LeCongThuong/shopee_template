@@ -19,7 +19,6 @@ future==0.18.2
 google-auth==1.28.0
 google-auth-oauthlib==0.4.4
 grpcio==1.36.1
-hydra-colorlog==1.0.1
 hydra-core @ git+https://github.com/facebookresearch/hydra.git@e381f5414c6b1b2bf60411786b5c8b24ec6f6d4b
 idna==2.10
 imageio==2.9.0
