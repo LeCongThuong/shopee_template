@@ -118,6 +118,7 @@ class BaselineModel(pl.LightningModule):
         self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         self.log("loss/train_text", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        return loss
 
     def get_loss_funcs(self):
         loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
