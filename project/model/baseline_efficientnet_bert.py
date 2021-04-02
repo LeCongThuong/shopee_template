@@ -176,7 +176,7 @@ class BaselineModel(pl.LightningModule):
         gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
         faiss.normalize_L2(embeddings)
         gpu_index.add(embeddings)
-        dists, ids = gpu_index.search(embeddings, embedding_num)
+        dists, ids = gpu_index.search(embeddings, 50)
         boolean_k_neighbors = dists > threshold
         k_neighbor_list = []
         for i in range(embedding_num):
