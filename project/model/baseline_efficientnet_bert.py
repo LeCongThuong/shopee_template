@@ -113,9 +113,11 @@ class BaselineModel(pl.LightningModule):
         image_text_loss = self.loss_func(image_text_embeddings, label_group, image_text_indices_tuple)
         image_loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
         text_loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
-        self.log("loss_image_text/train", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log("loss_image/train", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log("loss_text/train", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        loss = image_text_loss + image_loss + text_loss
+        self.log("loss/train_image_text", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss/train_text", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
 
     def get_loss_funcs(self):
         loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
