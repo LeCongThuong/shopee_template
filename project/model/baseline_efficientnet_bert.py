@@ -132,6 +132,8 @@ class BaselineModel(pl.LightningModule):
         f1_score = self.get_f1_dice_score(target_list, k_post_neighbor_pred_list)
         self.log('val/f1_score', f1_score)
         print("Validation: f1_score: ", f1_score)
+        with open('f_1_score.txt', 'w') as f:
+            f.write(str(f1_score))
         return f1_score
 
     def get_all_embeddings(self, dataloader, device):
