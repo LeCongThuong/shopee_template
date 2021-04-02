@@ -83,7 +83,7 @@ class BaselineModel(pl.LightningModule):
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
         self.learning_rate = optim.lr
-        self.self_attention = Self_Attn(out_feature*2)
+        self.self_attention = Self_Attn(32)
         self.linear = torch.nn.Linear(out_feature*2, out_feature)
         self.flatten = nn.Flatten()
 
@@ -94,7 +94,7 @@ class BaselineModel(pl.LightningModule):
         image_embedding = self.image_extractor(image)
         text_embedding = self.text_extractor(title_ids, attention_mask)
         image_text_concat = torch.cat([image_embedding, text_embedding], dim=1)
-        image_text_concat = image_text_concat.view(-1, 2, 32, 32)
+        image_text_concat = image_text_concat.view(-1, 32, 8, 8)
         image_text_embedding = self.self_attention(image_text_concat)
         image_text_embedding = self.flatten(image_text_embedding)
         image_text_embedding = self.linear(image_text_embedding)
