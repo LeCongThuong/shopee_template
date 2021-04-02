@@ -84,7 +84,7 @@ class BaselineModel(pl.LightningModule):
         self.loss_func, self.mining_func = self.get_loss_funcs()
         self.learning_rate = optim.lr
         self.self_attention = Self_Attn(32)
-        self.linear = torch.nn.Linear(out_feature*2, out_feature)
+        self.linear = torch.nn.Linear(768+1280, out_feature)
         self.flatten = nn.Flatten()
 
     def forward(self, image,
