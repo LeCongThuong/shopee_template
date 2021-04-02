@@ -8,7 +8,7 @@ from nltk import pos_tag, ne_chunk
 
 class TextProcessing:
 
-    def preprocess_text(title):
+    def preprocess_text(self, title):
         """
             preprocess text
             sentence: input text sentence for preprocessing
