@@ -85,6 +85,7 @@ class BaselineModel(pl.LightningModule):
         self.learning_rate = optim.lr
         self.self_attention = Self_Attn(out_feature*2)
         self.linear = torch.nn.Linear(out_feature*2, out_feature)
+        self.flatten = nn.Flatten()
 
     def forward(self, image,
                 title_ids,
@@ -93,7 +94,9 @@ class BaselineModel(pl.LightningModule):
         image_embedding = self.image_extractor(image)
         text_embedding = self.text_extractor(title_ids, attention_mask)
         image_text_concat = torch.cat([image_embedding, text_embedding], dim=1)
+        image_text_concat = image_text_concat.view(-1, 2, 32, 28)
         image_text_embedding = self.self_attention(image_text_concat)
+        image_text_embedding = self.flatten(image_text_embedding)
         image_text_embedding = self.linear(image_text_embedding)
         return image_text_embedding, image_embedding, text_embedding
 
