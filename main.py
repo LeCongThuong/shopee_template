@@ -56,7 +56,7 @@ def main(cfg: DictConfig) -> None:
     model_module.to(device)
     trainer.fit(model_module, train_dataloader=train_loader)
     model_module.evaluate_train_dataset(val_loader, cfg.data_dataset.val.csv_file, cfg.general.topk, device)
-
+    # model_module.load_model(checkpoint_path='/content/shopee_template/outputs/baseline/2021-04-01_101622/checkpoints/last.ckpt')
     # for restore continue training
     # trainer = Trainer(resume_from_checkpoint='some/path/to/my_checkpoint.ckpt')
     # model_module.predict_test_dataset(test_loader, test_csv_path, output_file_path, topk, device)
