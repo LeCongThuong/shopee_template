@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 class EfficientnetModel(pl.LightningModule):
-    def __init__(self, arch='efficientnet-b0', out_feature=512, dropout_ratio=0.2, **kwargs):
+    def __init__(self, arch='efficientnet-b0', out_feature=768, dropout_ratio=0.2, **kwargs):
         super().__init__()
         self.save_hyperparameters()
 
@@ -28,6 +28,41 @@ class EfficientnetModel(pl.LightningModule):
         out = self.drop_out(out)
         out = self.flatten(out)
         out = self.fc(out)
+        return out
+
+
+class Self_Attn(nn.Module):
+    """ Self attention Layer"""
+
+    def __init__(self, in_dim):
+        super(Self_Attn, self).__init__()
+        self.chanel_in = in_dim
+        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
+        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim // 8, kernel_size=1)
+        self.value_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+        self.gamma = nn.Parameter(torch.zeros(1))
+
+        self.softmax = nn.Softmax(dim=-1)  #
+
+    def forward(self, x):
+        """
+            inputs :
+                x : input feature maps( B X C X W X H)
+            returns :
+                out : self attention value + input feature
+                attention: B X N X N (N is Width*Height)
+        """
+        m_batchsize, C, width, height = x.size()
+        proj_query = self.query_conv(x).view(m_batchsize, -1, width * height).permute(0, 2, 1)  # B X CX(N)
+        proj_key = self.key_conv(x).view(m_batchsize, -1, width * height)  # B X C x (*W*H)
+        energy = torch.bmm(proj_query, proj_key)  # transpose check
+        attention = self.softmax(energy)  # BX (N) X (N)
+        proj_value = self.value_conv(x).view(m_batchsize, -1, width * height)  # B X C X N
+
+        out = torch.bmm(proj_value, attention.permute(0, 2, 1))
+        out = out.view(m_batchsize, C, width, height)
+
+        out = self.gamma * out + x
         return out
 
 
@@ -48,6 +83,8 @@ class BaselineModel(pl.LightningModule):
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
         self.learning_rate = optim.lr
+        self.self_attention = Self_Attn(out_feature*2)
+        self.linear = torch.nn.Linear(out_feature*2, out_feature)
 
     def forward(self, image,
                 title_ids,
@@ -55,19 +92,27 @@ class BaselineModel(pl.LightningModule):
                 ):
         image_embedding = self.image_extractor(image)
         text_embedding = self.text_extractor(title_ids, attention_mask)
-        return torch.cat([image_embedding, text_embedding], dim=1)
+        image_text_concat = torch.cat([image_embedding, text_embedding], dim=1)
+        image_text_embedding = self.self_attention(image_text_concat)
+        image_text_embedding = self.linear(image_text_embedding)
+        return image_text_embedding, image_embedding, text_embedding
 
     def _step(self, batch):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
-        embedding = self(images_batch, title_ids, attention_masks)
-        return embedding, label_group
+        image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
+        return image_text_embedding, image_embedding, text_embedding, label_group
 
     def training_step(self, batch, batch_idx):
-        embeddings, label_group = self._step(batch)
-        indices_tuple = self.mining_func(embeddings, label_group)
-        loss = self.loss_func(embeddings, label_group, indices_tuple)
-        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        return loss
+        image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
+        image_text_indices_tuple = self.mining_func(image_text_embeddings, label_group)
+        image_indices_tuple = self.mining_func(image_embeddings, label_group)
+        text_indices_tuple = self.mining_func(text_embeddings, label_group)
+        image_text_loss = self.loss_func(image_text_embeddings, label_group, image_text_indices_tuple)
+        image_loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
+        text_loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
+        self.log("loss_image_text/train", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss_image/train", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss_text/train", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
 
     def get_loss_funcs(self):
         loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)

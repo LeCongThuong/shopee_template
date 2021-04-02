@@ -3,6 +3,6 @@ name: efficientnetb0_bert
 
 _target_: project.model.BaselineModel
 arch: 'efficientnet-b0'
-out_feature: 512
+out_feature: 768
 dropout_ratio: 0.2
-model_name: 'bert-base-uncased'
+model_name: 'bert-base-multilingual-cased'

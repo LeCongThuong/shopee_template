@@ -13,7 +13,7 @@ class TextProcessing:
             preprocess text
             sentence: input text sentence for preprocessing
         """
-        title = title.lower()
+        # title = title.lower()
         title = title.translate(str.maketrans('', '', string.punctuation))
         title = title.strip()
         title = word_tokenize(title)
