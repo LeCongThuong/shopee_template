@@ -1,4 +1,5 @@
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 
 class AlbumentationAugment:
@@ -29,9 +30,11 @@ class AlbumentationAugment:
             A.Rotate(limit=(-90, 90)),
             A.HueSaturationValue(p=0.3),
             A.HorizontalFlip(p=0.5),
-            A.VerticalFlip(p=0.5),
-            A.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            A.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+            ToTensorV2(),
         ])
 
     def __call__(self, image):
-        return self.transform(image=image)
+        return self.transform(image=image)['image']
+
+

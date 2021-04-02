@@ -3,13 +3,13 @@ name: image_augment
 
 train:
   _target_: project.augmentation.AlbumentationAugment
-  height: 448
-  width: 448
+  height: 512
+  width: 512
 val:
-  _target_: albumentations.Resize
-  height: 448
-  width: 448
+  _target_: project.augmentation.DefaultAug
+  height: 512
+  width: 512
 test:
-  _target_: albumentations.Resize
-  height: 448
-  width: 448
+  _target_: project.augmentation.DefaultAug
+  height: 512
+  width: 512

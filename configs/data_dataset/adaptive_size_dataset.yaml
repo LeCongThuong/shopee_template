@@ -8,7 +8,7 @@ train:
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
-  text_max_length: 16
+  text_max_length: 20
   text_padding: 'max_length'
   is_truncate: True
 
@@ -20,7 +20,7 @@ val:
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
-  text_max_length: 16
+  text_max_length: 20
   text_padding: 'max_length'
   is_truncate: True
 
@@ -32,6 +32,6 @@ test:
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
   tokenizer_str: 'bert-base-uncased'
-  text_max_length: 16
+  text_max_length: 20
   text_padding: 'max_length'
   is_truncate: True

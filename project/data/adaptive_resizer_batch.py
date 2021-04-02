@@ -36,20 +36,19 @@ class AdaptiveResizerDataset(Dataset):
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # transform data
-        image = self.transform(image=image)["image"]
-        image = np.transpose(image, (2, 0, 1))
+        image = self.transform(image=image)
         title = self.text_process(title)
 
         tokenized = self.tokenizer([title], padding=self.text_padding, truncation=self.is_truncate, max_length=self.text_max_length,
                                    return_tensors="pt")
 
         if not self.do_train:
-            return {"image": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
+            return {"image": image, "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
                     "attention_mask": torch.as_tensor(tokenized["attention_mask"][0])}
 
         label_group = self.label_group_list[idx]
 
-        return {"images": torch.as_tensor(image, dtype=torch.float), "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
+        return {"images": image, "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
                 "attention_masks": torch.as_tensor(tokenized["attention_mask"][0]), "label_groups": torch.as_tensor(label_group)}
 
     def set_up(self, image_dir, csv_file):

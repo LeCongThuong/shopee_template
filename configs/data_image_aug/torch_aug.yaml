@@ -1,0 +1,15 @@
+# @package data_image_aug
+name: image_augment
+
+train:
+  _target_: project.augmentation.TorchAug
+  height: 512
+  width: 512
+val:
+  _target_: project.augmentation.DefaultAug
+  height: 512
+  width: 512
+test:
+  _target_: project.augmentation.DefaultAug
+  height: 512
+  width: 512
