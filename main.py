@@ -53,6 +53,10 @@ def main(cfg: DictConfig) -> None:
         **cfg.trainer
     )
 
+    # lr_finder = trainer.tuner.lr_find(model_module, train_dataloader=train_loader)
+    # suggested_lr = lr_finder.suggestion()
+    # print("Suggest: ", suggested_lr)
+
     model_module.to(device)
     trainer.fit(model_module, train_dataloader=train_loader)
     model_module.evaluate_train_dataset(val_loader, cfg.data_dataset.val.csv_file, cfg.general.topk, device)

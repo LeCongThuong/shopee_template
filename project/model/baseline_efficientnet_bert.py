@@ -47,6 +47,7 @@ class BaselineModel(pl.LightningModule):
         self.image_extractor = EfficientnetModel(arch=arch, out_feature=out_feature, dropout_ratio=dropout_ratio)
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
+        self.learning_rate = optim.lr
 
     def forward(self, image,
                 title_ids,
@@ -66,6 +67,7 @@ class BaselineModel(pl.LightningModule):
         indices_tuple = self.mining_func(embeddings, label_group)
         loss = self.loss_func(embeddings, label_group, indices_tuple)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        return loss
 
     def get_loss_funcs(self):
         loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
@@ -145,7 +147,7 @@ class BaselineModel(pl.LightningModule):
         return 2 * n / (len(neighbor_pred) + len(target))
 
     def configure_optimizers(self):
-        return hydra.utils.instantiate(self.hparams.optim, self.parameters())
+        return hydra.utils.instantiate(self.hparams.optim, self.parameters(), lr=self.learning_rate)
 
     def extract_input(self, batch):
         images = batch["images"]
