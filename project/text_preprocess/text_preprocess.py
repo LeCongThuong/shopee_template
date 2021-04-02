@@ -18,7 +18,7 @@ class TextProcessing:
         title = title.translate(str.maketrans('', '', string.punctuation))
         title = title.strip()
         title = word_tokenize(title)
-        title = [word for word in title if not word in stopwords]
+        title = [word for word in title if not word in stopwords.words('english')]
         title = ' '.join(title)
         return title
 
