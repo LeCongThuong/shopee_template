@@ -19,8 +19,6 @@ defaults:
   - callback: default_callbacks
   - logging: tensorboard
   - trainer: default_trainer
-  - override hydra/hydra_logging: colorlog
-  - override hydra/job_logging: colorlog
 
 general:
   threshold: 0.8
