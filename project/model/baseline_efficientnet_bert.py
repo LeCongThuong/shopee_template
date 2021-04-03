@@ -215,4 +215,3 @@ class BaselineModel(pl.LightningModule):
     def load_model(self, checkpoint_path):
         model = BaselineModel.load_from_checkpoint(checkpoint_path)
         return model
-
