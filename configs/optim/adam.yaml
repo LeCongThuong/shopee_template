@@ -1,4 +1,8 @@
 # @package optim
-_target_: torch.optim.Adam
-lr: 3e-4
+backbone:
+  _target_: torch.optim.Adam
+  lr: 3e-4
+head:
+  _target_: torch.optim.Adam
+    lr: 3e-2
 

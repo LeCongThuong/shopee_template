@@ -82,7 +82,6 @@ class BaselineModel(pl.LightningModule):
         self.image_extractor = EfficientnetModel(arch=arch, out_feature=out_feature, dropout_ratio=dropout_ratio)
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
-        self.learning_rate = optim.lr
         self.self_attention = Self_Attn(32)
         self.linear = torch.nn.Linear(768+1280, out_feature)
         self.flatten = nn.Flatten()
@@ -204,7 +203,11 @@ class BaselineModel(pl.LightningModule):
         return 2 * n / (len(neighbor_pred) + len(target))
 
     def configure_optimizers(self):
-        return hydra.utils.instantiate(self.hparams.optim, self.parameters(), lr=self.learning_rate)
+        text_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.text_extractor.parameters(), lr=self.hparams.optim.backbone.lr)
+        image_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.image_extractor.parameters(), lr=self.hparams.optim.backbone.lr)
+        self_attention_optim = hydra.utils.instantiate(self.hparams.optim.head, self.self_attention.parameters(), lr=self.hparams.optim.head.lr)
+        linear_optim = hydra.utils.instantiate(self.hparams.optim.head, self.linear.parameters(), lr=self.hparams.optim.head.lr)
+        return [text_extractor_optim, image_extractor_optim, self_attention_optim, linear_optim]
 
     def extract_input(self, batch):
         images = batch["images"]
