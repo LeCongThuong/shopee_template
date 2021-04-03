@@ -2,7 +2,7 @@ hydra:
   run:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
-    dir: outputs/${experiment}/${now:%Y-%m-%d_%H%M%S}/
+    dir: /gdrive/MyDrive/shopee_dataset/outputs/${experiment}/${now:%Y-%m-%d_%H%M%S}/
 
 # Global configurations shared between different modules
 experiment: baseline
