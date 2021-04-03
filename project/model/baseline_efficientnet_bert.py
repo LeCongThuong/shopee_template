@@ -114,10 +114,10 @@ class BaselineModel(pl.LightningModule):
         image_loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
         text_loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
         loss = image_text_loss + image_loss + text_loss
-        self.log("loss/train_image_text", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log("loss/train_text", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
-        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        self.log("loss/train_image_text", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
+        self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
+        self.log("loss/train_text", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
+        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
         output = {"loss": loss}
         return output
 
