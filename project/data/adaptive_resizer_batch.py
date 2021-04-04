@@ -43,8 +43,8 @@ class AdaptiveResizerDataset(Dataset):
                                    return_tensors="pt")
 
         if not self.do_train:
-            return {"image": image, "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
-                    "attention_mask": torch.as_tensor(tokenized["attention_mask"][0])}
+            return {"images": image, "title_ids": torch.as_tensor(tokenized["input_ids"][0]),
+                    "attention_masks": torch.as_tensor(tokenized["attention_mask"][0])}
 
         label_group = self.label_group_list[idx]
 
