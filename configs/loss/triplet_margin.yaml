@@ -4,6 +4,7 @@ loss_func:
   margin: 0.2
   distance:
     _target_: pytorch_metric_learning.distances.LpDistance
+    normalize_embeddings: true
   reducer:
     _target_: pytorch_metric_learning.reducers.ThresholdReducer
     low: 0
@@ -15,4 +16,5 @@ mining_func:
   margin: 0.2
   distance:
     _target_: pytorch_metric_learning.distances.LpDistance
+    normalize_embeddings: true
   type_of_triplets: semihard
