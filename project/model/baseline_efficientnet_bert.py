@@ -81,7 +81,7 @@ class BaselineModel(pl.LightningModule):
         self.save_hyperparameters()
         self.image_extractor = EfficientnetModel(arch=arch, out_feature=out_feature, dropout_ratio=dropout_ratio)
         self.text_extractor = BertBaseCaseModel(model_name=model_name)
-        self.loss_func, self.mining_func = self.get_loss_funcs()
+        self.loss_func = self.get_loss_funcs()
         self.self_attention = Self_Attn(36)
         self.linear = torch.nn.Linear(768+1536, out_feature)
         self.flatten = nn.Flatten()
@@ -106,12 +106,9 @@ class BaselineModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
-        image_text_indices_tuple = self.mining_func(image_text_embeddings, label_group)
-        image_indices_tuple = self.mining_func(image_embeddings, label_group)
-        text_indices_tuple = self.mining_func(text_embeddings, label_group)
-        image_text_loss = self.loss_func(image_text_embeddings, label_group, image_text_indices_tuple)
-        image_loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
-        text_loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
+        image_text_loss = self.loss_func(image_text_embeddings, label_group)
+        image_loss = self.loss_func(image_embeddings, label_group)
+        text_loss = self.loss_func(text_embeddings, label_group)
         loss = image_text_loss + image_loss + text_loss
         self.log("loss/train_image_text", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
         self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
@@ -122,8 +119,7 @@ class BaselineModel(pl.LightningModule):
 
     def get_loss_funcs(self):
         loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
-        mining_func = hydra.utils.instantiate(self.hparams.loss.mining_func)
-        return loss_func, mining_func
+        return loss_func
 
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
         embedding_list = self.get_all_embeddings(val_dataloader, device)
