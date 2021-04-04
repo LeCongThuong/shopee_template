@@ -3,7 +3,7 @@ loss_func:
   _target_: pytorch_metric_learning.losses.TripletMarginLoss
   margin: 0.2
   distance:
-    _target_: pytorch_metric_learning.distances.CosineSimilarity
+    _target_: pytorch_metric_learning.distances.LpDistance
   reducer:
     _target_: pytorch_metric_learning.reducers.ThresholdReducer
     low: 0
@@ -14,5 +14,5 @@ mining_func:
   _target_: pytorch_metric_learning.miners.TripletMarginMiner
   margin: 0.2
   distance:
-    _target_: pytorch_metric_learning.distances.CosineSimilarity
+    _target_: pytorch_metric_learning.distances.LpDistance
   type_of_triplets: semihard

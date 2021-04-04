@@ -2,7 +2,10 @@
 backbone:
   _target_: torch.optim.Adam
   lr: 3e-4
+  weight_decay: 4e-4
+
 head:
   _target_: torch.optim.Adam
   lr: 3e-2
+  weight_decay: 4e-4
 

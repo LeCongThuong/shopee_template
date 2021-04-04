@@ -116,7 +116,7 @@ class BaselineModel(pl.LightningModule):
         self.log("loss/train_image_text", image_text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
         self.log("loss/train_image", image_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
         self.log("loss/train_text", text_loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
-        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=False)
+        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         output = {"loss": loss}
         return output
 
@@ -203,10 +203,10 @@ class BaselineModel(pl.LightningModule):
         return 2 * n / (len(neighbor_pred) + len(target))
 
     def configure_optimizers(self):
-        text_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.text_extractor.parameters(), lr=self.hparams.optim.backbone.lr)
-        image_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.image_extractor.parameters(), lr=self.hparams.optim.backbone.lr)
-        self_attention_optim = hydra.utils.instantiate(self.hparams.optim.head, self.self_attention.parameters(), lr=self.hparams.optim.head.lr)
-        linear_optim = hydra.utils.instantiate(self.hparams.optim.head, self.linear.parameters(), lr=self.hparams.optim.head.lr)
+        text_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.text_extractor.parameters())
+        image_extractor_optim = hydra.utils.instantiate(self.hparams.optim.backbone, self.image_extractor.parameters())
+        self_attention_optim = hydra.utils.instantiate(self.hparams.optim.head, self.self_attention.parameters())
+        linear_optim = hydra.utils.instantiate(self.hparams.optim.head, self.linear.parameters())
         return [text_extractor_optim, image_extractor_optim, self_attention_optim, linear_optim]
 
     def extract_input(self, batch):
