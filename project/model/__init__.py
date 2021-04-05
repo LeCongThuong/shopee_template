@@ -1,1 +1,1 @@
-from .baseline_efficientnet_bert import BaselineModel
+from .baseline_efficientnet_bert import BaselineModel, BaseModel
