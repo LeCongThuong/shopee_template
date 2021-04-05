@@ -13,5 +13,5 @@ loss_func:
 
 mining_func:
   _target_: loss_mining.RhoMiner
-  miner_rho_distance_lower_cutof: 0.00001
-  contrastive_p: 0.2
+  miner_rho_distance_lower_cutoff: 0.00001
+  miner_rho_distance_cp: 0.2
