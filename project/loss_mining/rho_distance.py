@@ -59,6 +59,7 @@ class RhoMiner(BaseTupleMiner):
             return q_d_inv.detach().cpu().numpy()
 
     def pdist(self, A, eps=1e-4):
+        A = torch.nn.functional.normalize(A, dim=1)
         prod = torch.mm(A, A.t())
         norm = prod.diag().unsqueeze(1).expand_as(prod)
         res = (norm + norm.t() - 2 * prod).clamp(min=0)
