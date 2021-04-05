@@ -122,6 +122,7 @@ class BaselineModel(pl.LightningModule):
         return loss_func
 
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
+        self.to(device)
         embedding_list = self.get_all_embeddings(val_dataloader, device)
         posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
         k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
@@ -155,6 +156,7 @@ class BaselineModel(pl.LightningModule):
         return posting_id_list, target_list
 
     def predict_test_dataset(self, test_dataloader, csv_file, output_file_path, threshold, device) -> None:
+        self.to(device)
         embedding_list = self.get_all_embeddings(test_dataloader, device)
         posting_id_list, _ = self.process_csv_file(csv_file, test_mode=True)
         k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
