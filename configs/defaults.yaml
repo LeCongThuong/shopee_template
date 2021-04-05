@@ -5,7 +5,7 @@ hydra:
     dir: /gdrive/MyDrive/shopee_dataset/outputs/${experiment}/${now:%Y-%m-%d_%H%M%S}/
 
 # Global configurations shared between different modules
-experiment: baseline
+experiment: efficientnetb3
 
 # Composing nested config with default
 defaults:
@@ -13,7 +13,7 @@ defaults:
   - data_sampler: m_per_class_sampler
   - data_image_aug: torch_aug
   - data_loader: shopee_loader
-  - model: efficientnetb0_bert
+  - model: efficientnetb3
   - loss@model.loss: triplet_rho_mining
   - optim@model.optim: adam
   - callback: default_callbacks

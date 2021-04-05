@@ -4,11 +4,6 @@ import hydra
 from efficientnet_pytorch import EfficientNet
 import torch.nn as nn
 from transformers import AutoModel
-from project.utils import read_csv
-import numpy as np
-import pandas as pd
-import faiss
-from tqdm import tqdm
 from .base_model import BaseModel
 
 

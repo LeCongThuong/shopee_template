@@ -12,16 +12,13 @@ class BaseModel(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-    def forward(self, image,
-                title_ids,
-                attention_mask=None,
-                ):
+    def forward(self, **kwargs):
         raise NotImplementedError
 
-    def training_step(self, batch, batch_idx, **kwargs):
+    def training_step(self, **kwargs):
         raise NotImplementedError
 
-    def configure_optimizers(self):
+    def configure_optimizers(self, **kwargs):
         raise NotImplementedError
 
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
