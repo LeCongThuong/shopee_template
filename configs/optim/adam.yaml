@@ -1,7 +1,7 @@
 # @package optim
 backbone:
   _target_: torch.optim.Adam
-  lr: 3e-4
+  lr: 5e-3
   weight_decay: 4e-4
 
 head:
