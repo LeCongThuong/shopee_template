@@ -12,7 +12,7 @@ class EfficientnetExtractor(BaseModel):
         self.adaptive_pooling = nn.AdaptiveAvgPool2d(output_size=1)
         # self.drop_out = nn.Dropout(p=dropout_ratio, inplace=False)
         self.flatten = nn.Flatten()
-        self.loss_func, self.mining_func = self.get_loss_func()
+        self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image,
                 title_ids,
