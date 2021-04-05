@@ -1,0 +1,17 @@
+# @package loss
+loss_func:
+  _target_: pytorch_metric_learning.losses.TripletMarginLoss
+  margin: 0.2
+  distance:
+    _target_: pytorch_metric_learning.distances.LpDistance
+    normalize_embeddings: true
+  reducer:
+    _target_: pytorch_metric_learning.reducers.ThresholdReducer
+    low: 0
+  swap: true
+  smooth_loss: true
+
+mining_func:
+  _target_: loss_mining.RhoMiner
+  miner_rho_distance_lower_cutof: 0.00001
+  contrastive_p: 0.2

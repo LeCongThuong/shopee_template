@@ -1,17 +1,19 @@
 import numpy as np
 import torch
+from pytorch_metric_learning.miners import BaseTupleMiner
 
 
-class BatchMiner():
-    def __init__(self, miner_rho_distance_lower_cutoff, miner_rho_distance_cp):
-        self.lower_cutoff  = miner_rho_distance_lower_cutoff
+class RhoMiner(BaseTupleMiner):
+    def __init__(self, miner_rho_distance_lower_cutoff, miner_rho_distance_cp, **kwargs):
+        super().__init__(**kwargs)
+        self.lower_cutoff = miner_rho_distance_lower_cutoff
         self.contrastive_p = miner_rho_distance_cp
         self.name = 'rho_distance'
 
-    def __call__(self, batch, labels, return_distances=False):
+    def mine(self, embeddings, labels, ref_emb, ref_labels):
         if isinstance(labels, torch.Tensor): labels = labels.detach().cpu().numpy()
-        bs = batch.shape[0]
-        distances = self.pdist(batch.detach()).clamp(min=self.lower_cutoff)
+        bs = embeddings.shape[0]
+        distances = self.pdist(embeddings.detach()).clamp(min=self.lower_cutoff)
 
         positives, negatives = [], []
         anchors = []
@@ -29,20 +31,14 @@ class BatchMiner():
                     pos[i] = 0
                     negatives.append(np.random.choice(np.where(pos)[0]))
                 else:
-                    q_d_inv = self.inverse_sphere_distances(batch, distances[i], labels, labels[i])
+                    q_d_inv = self.inverse_sphere_distances(embeddings, distances[i], labels, labels[i])
                     #Sample positives randomly
                     pos[i] = 0
                     positives.append(np.random.choice(np.where(pos)[0]))
                     #Sample negatives by distance
                     negatives.append(np.random.choice(bs, p=q_d_inv))
 
-        sampled_triplets = [[a, p, n] for a,p,n in zip(anchors, positives, negatives)]
-        self.push_triplets = np.sum([m[1] == m[2] for m in labels[sampled_triplets]])
-
-        if return_distances:
-            return sampled_triplets, distances
-        else:
-            return sampled_triplets
+        return torch.as_tensor(anchors), torch.as_tensor(positives), torch.as_tensor(negatives)
 
     def inverse_sphere_distances(self, batch, anchor_to_all_dists, labels, anchor_label):
             dists = anchor_to_all_dists
