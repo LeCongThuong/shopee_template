@@ -56,8 +56,6 @@ def main(cfg: DictConfig) -> None:
     # lr_finder = trainer.tuner.lr_find(model_module, train_dataloader=train_loader)
     # suggested_lr = lr_finder.suggestion()
     # print("Suggest: ", suggested_lr)
-
-    model_module.to(device)
     trainer.fit(model_module, train_dataloader=train_loader)
     model_module.evaluate_train_dataset(val_loader, cfg.data_dataset.val.csv_file, cfg.general.threshold, device)
     # model_module.load_model(checkpoint_path='/content/shopee_template/outputs/baseline/2021-04-01_101622/checkpoints/last.ckpt')
