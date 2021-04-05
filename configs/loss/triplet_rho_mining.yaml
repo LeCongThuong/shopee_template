@@ -12,6 +12,6 @@ loss_func:
   smooth_loss: true
 
 mining_func:
-  _target_: loss_mining.RhoMiner
+  _target_: project.loss_mining.RhoMiner
   miner_rho_distance_lower_cutoff: 0.00001
   miner_rho_distance_cp: 0.2
