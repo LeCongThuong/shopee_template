@@ -9,8 +9,7 @@ from tqdm import tqdm
 
 class BaseModel(pl.LightningModule):
     def __init__(self, **kwargs):
-        super().__init__()
-        self.save_hyperparameters()
+        super().__init__(**kwargs)
 
     def forward(self, **kwargs):
         raise NotImplementedError

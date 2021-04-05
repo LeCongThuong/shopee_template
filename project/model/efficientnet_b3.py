@@ -7,6 +7,7 @@ import hydra
 class EfficientnetExtractor(BaseModel):
     def __init__(self, optim, loss, arch='efficientnet-b3', **kwargs):
         super().__init__()
+        self.save_hyperparameters()
         self.base = EfficientNet.from_pretrained(arch)
         self.adaptive_pooling = nn.AdaptiveAvgPool2d(output_size=1)
         # self.drop_out = nn.Dropout(p=dropout_ratio, inplace=False)
