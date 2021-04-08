@@ -1,0 +1,5 @@
+# @package model
+name: efficientnetb0_bert
+
+_target_: project.model.EfficientnetExtractor
+arch: 'efficientnet-b2'
