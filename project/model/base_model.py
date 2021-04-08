@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import faiss
 from tqdm import tqdm
+import os
+import matplotlib.pyplot as plt
 
 
 class BaseModel(pl.LightningModule):
@@ -54,6 +56,18 @@ class BaseModel(pl.LightningModule):
         target_list = df['target'].to_numpy()
         return posting_id_list, target_list
 
+    def process_csv_file_for_visualization(self, csv_file, test_mode=False):
+        df = read_csv(csv_file)
+        posting_id_list = df['posting_id'].to_numpy()
+        image_list = df['image'].to_list()
+        if test_mode:
+            return posting_id_list, None
+        if 'target' not in df.columns:
+            target_dict = df.groupby('label_group').posting_id.agg('unique').to_dict()
+            df['target'] = df.label_group.map(target_dict)
+        target_list = df['target'].to_numpy()
+        return posting_id_list, image_list, target_list
+
     def predict_test_dataset(self, test_dataloader, csv_file, output_file_path, threshold, device) -> None:
         self.to(device)
         embedding_list = self.get_all_embeddings(test_dataloader, device)
@@ -99,3 +113,38 @@ class BaseModel(pl.LightningModule):
         n = len(np.intersect1d(neighbor_pred, target))
         return 2 * n / (len(neighbor_pred) + len(target))
 
+    def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6):
+        embedding_list = self.get_all_embeddings(dataloader, device)
+        posting_id_list, image_list, target_list = self.process_csv_file_for_visualization(csv_file, test_mode=False)
+        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
+        chosen_postion_list = np.random.choice(len(posting_id_list), num_image, replace=False)
+        chosen_posting_id_list = posting_id_list[chosen_postion_list]
+        chosen_image_list = [os.path.join(image_source, image_name) for image_name in image_list[chosen_postion_list]]
+        chosen_target_list = target_list[chosen_postion_list]
+        chosen_pred_list = k_post_neighbor_pred_list[chosen_postion_list]
+        post_image_dict = dict(zip(chosen_posting_id_list, chosen_image_list))
+        for i in range(num_image):
+            chosen_post = chosen_posting_id_list[:k_show]
+            target_list = chosen_target_list[i][:k_show]
+            pred_list = chosen_pred_list[i][:k_show + 1]
+            self.visualize_result(chosen_post, post_image_dict, target_list, pred_list, result_dir, k_show)
+
+    def visualize_result(self, chosen_post_id, post_image_dict, target_list, pred_list, result_dir, k_show):
+        file_path = os.path.joint(result_dir, chosen_post_id)
+        query_image = post_image_dict[chosen_post_id]
+        fig, ax = plt.subplots(nrows=3, ncols=k_show, figsize=(12, 14))
+        ax[0][0].imshow(query_image)
+        for idx, target in enumerate(target_list):
+            image_path = post_image_dict[target]
+            gt_image = plt.imread(image_path)
+            ax[1][idx].imshow(gt_image)
+
+        for idx, pred in enumerate(pred_list):
+            if idx == 0:
+                continue
+            image_path = post_image_dict[pred]
+            pred_image = plt.imread(image_path)
+            ax[2][idx - 1].imshow(pred_image)
+        fig.tight_layout()
+        plt.savefig(file_path)
+        plt.close()
