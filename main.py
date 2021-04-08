@@ -5,6 +5,7 @@ import pytorch_lightning as pl
 from omegaconf import DictConfig, OmegaConf
 import torch
 from project.data import ShopeeDatasetLoader
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ def main(cfg: DictConfig) -> None:
         callbacks=callbacks,
         **cfg.trainer
     )
-
+    os.makedirs(cfg.general.result_dir, exist_ok=True)
     # lr_finder = trainer.tuner.lr_find(model_module, train_dataloader=train_loader)
     # suggested_lr = lr_finder.suggestion()
     # print("Suggest: ", suggested_lr)

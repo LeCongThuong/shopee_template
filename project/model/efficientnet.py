@@ -51,3 +51,7 @@ class EfficientnetExtractor(BaseModel):
     def configure_optimizers(self):
         optim = hydra.utils.instantiate(self.hparams.optim, self.parameters())
         return optim
+
+    def load_model(self, checkpoint_path):
+        model = EfficientnetExtractor.load_from_checkpoint(checkpoint_path)
+        return model

@@ -140,7 +140,8 @@ class BaseModel(pl.LightningModule):
         file_path = os.path.join(result_dir, f"{chosen_post_id}.jpg")
         query_image = post_image_dict[chosen_post_id]
         query_image = plt.imread(os.path.join(image_source, query_image))
-        fig, ax = plt.subplots(nrows=3, ncols=k_show, figsize=(12, 14))
+        fig, ax = plt.subplots(nrows=3, ncols=k_show, figsize=(12, 8))
+        np.vectorize(lambda ax: ax.axis('off'))(ax)
         ax[0][0].imshow(query_image)
         for idx, target in enumerate(target_list):
             image_path = post_image_dict[target]
@@ -153,7 +154,7 @@ class BaseModel(pl.LightningModule):
             image_path = post_image_dict[pred]
             pred_image = plt.imread(os.path.join(image_source, image_path))
             ax[2][idx - 1].imshow(pred_image)
-        fig.tight_layout()
-        plt.axis('off')
+        plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
+

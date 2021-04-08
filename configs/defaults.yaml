@@ -24,3 +24,5 @@ general:
   threshold: 0.85
   seed: 1234
   type_of_triplet: semihard
+  result_dir: image_pred_result
+
