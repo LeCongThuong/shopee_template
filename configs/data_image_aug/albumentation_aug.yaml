@@ -3,13 +3,13 @@ name: image_augment
 
 train:
   _target_: project.augmentation.AlbumentationAugment
-  height: 448
-  width: 448
+  height: 260
+  width: 260
 val:
   _target_: project.augmentation.DefaultAug
-  height: 448
-  width: 448
+  height: 260
+  width: 260
 test:
   _target_: project.augmentation.DefaultAug
-  height: 448
-  width: 448
+  height: 260
+  width: 260
