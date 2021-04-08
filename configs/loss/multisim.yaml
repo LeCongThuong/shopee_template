@@ -1,0 +1,13 @@
+# @package loss
+loss_func:
+  _target_: pytorch_metric_learning.losses.MultiSimilarityLoss
+  alpha: 2
+  beta: 50
+  base: 0.5
+
+
+mining_func:
+  _target_: pytorch_metric_learning.miners.UniformHistogramMiner
+  num_bins: 100
+  pos_per_bin: 25
+  neg_per_bin: 33

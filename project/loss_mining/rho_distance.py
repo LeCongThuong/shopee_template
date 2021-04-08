@@ -45,11 +45,11 @@ class RhoMiner(BaseTupleMiner):
             dists = anchor_to_all_dists
             bs, dim = len(dists), batch.shape[-1]
 
-            #negated log-distribution of distances of unit sphere in dimension <dim>
+            # negated log-distribution of distances of unit sphere in dimension <dim>
             log_q_d_inv = ((2.0 - float(dim)) * torch.log(dists) - (float(dim-3) / 2) * torch.log(1.0 - 0.25 * (dists.pow(2))))
             log_q_d_inv[np.where(labels == anchor_label)[0]] = 0
 
-            q_d_inv = torch.exp(log_q_d_inv - torch.max(log_q_d_inv))# - max(log) for stability
+            q_d_inv = torch.exp(log_q_d_inv - torch.max(log_q_d_inv)) # - max(log) for stability
             q_d_inv[np.where(labels == anchor_label)[0]] = 0
 
             ### NOTE: Cutting of values with high distances made the results slightly worse. It can also lead to

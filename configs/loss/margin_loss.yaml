@@ -1,0 +1,16 @@
+# @package loss
+loss_func:
+  _target_: pytorch_metric_learning.losses.MarginLoss
+  margin: 0.2
+  nu: 4e-4
+  beta: 1.2
+  triplets_per_anchor: all
+  learn_beta: true
+  num_classes: null
+
+
+mining_func:
+  _target_: pytorch_metric_learning.miners.UniformHistogramMiner
+  num_bins: 100
+  pos_per_bin: 25
+  neg_per_bin: 33
