@@ -1,0 +1,8 @@
+# @package model
+name: resizerefficientnet
+
+_target_: project.model.ResizeEfficientnet
+arch: 'efficientnet-b2'
+r: 1
+n: 16
+image_size: 224
