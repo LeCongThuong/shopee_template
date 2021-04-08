@@ -59,6 +59,7 @@ def main(cfg: DictConfig) -> None:
     # print("Suggest: ", suggested_lr)
     trainer.fit(model_module, train_dataloader=train_loader)
     model_module.evaluate_train_dataset(val_loader, cfg.data_dataset.val.csv_file, cfg.general.threshold, device)
+    # model_module.visual_similar_image_result(val_loader, cfg.data_dataset.val.csv_file, cfg.general.threshold, device, cfg.data_dataset.train.image_dir, cfg.general.result_dir, num_image=50, k_show=6)
     # model_module.load_model(checkpoint_path='/content/shopee_template/outputs/baseline/2021-04-01_101622/checkpoints/last.ckpt')
     # for restore continue training
     # trainer = Trainer(resume_from_checkpoint='some/path/to/my_checkpoint.ckpt')
