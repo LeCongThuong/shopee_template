@@ -6,6 +6,7 @@ import torch.nn as nn
 from transformers import AutoModel
 from .base_model import BaseModel
 
+
 # English --> 18939 samples, Indonesia -->8715 samples, Malay --> 2398 samples, German --> 854 samples
 class EfficientnetModel(pl.LightningModule):
     def __init__(self, arch='efficientnet-b0', out_feature=768, dropout_ratio=0.2, **kwargs):
