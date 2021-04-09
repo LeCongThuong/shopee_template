@@ -5,7 +5,7 @@ from .base_model import BaseModel
 
 
 class BertBaseCaseModel(BaseModel):
-    def __init__(self, model_name='bert-base-uncased'):
+    def __init__(self, model_name='bert-base-uncased', **kwargs):
         super().__init__()
         self.model = AutoModel.from_pretrained(model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
