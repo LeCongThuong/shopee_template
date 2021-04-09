@@ -1,0 +1,5 @@
+# @package model
+name: bert
+
+_target_: project.model.BertBaseCaseModel
+model_name: 'bert-base-uncased'
