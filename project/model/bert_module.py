@@ -17,14 +17,14 @@ class BertBaseCaseModel(BaseModel):
     def training_step(self,  batch, batch_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
         text_indices_tuple = self.mining_func(text_embeddings, label_group)
-        loss = self.loss_func(image_text_embeddings, label_group, text_indices_tuple)
+        loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         output = {"loss": loss}
         return output
 
     def _step(self, batch):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
-        image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
+        image_text_embedding, image_embedding, text_embedding = self(title_ids, attention_masks)
         return image_text_embedding, image_embedding, text_embedding, label_group
 
     def get_loss_funcs(self):
