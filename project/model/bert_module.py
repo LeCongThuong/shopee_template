@@ -11,7 +11,7 @@ class BertBaseCaseModel(BaseModel):
         self.model = AutoModel.from_pretrained(model_name)
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
-    def forward(self, input_ids, attention_mask=None):
+    def forward(self, image, input_ids, attention_mask=None):
         return None, None, self.model(input_ids=input_ids, attention_mask=attention_mask)[1]
 
     def training_step(self,  batch, batch_idx, **kargs):
@@ -24,7 +24,7 @@ class BertBaseCaseModel(BaseModel):
 
     def _step(self, batch):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
-        image_text_embedding, image_embedding, text_embedding = self(title_ids, attention_masks)
+        image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
         return image_text_embedding, image_embedding, text_embedding, label_group
 
     def get_loss_funcs(self):
