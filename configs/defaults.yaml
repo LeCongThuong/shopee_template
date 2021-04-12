@@ -3,6 +3,8 @@ hydra:
     # Configure output dir of each experiment programmatically from the arguments
     # Example "outputs/mnist/classifier/baseline/2021-03-10-141516"
     dir: /gdrive/MyDrive/shopee_dataset/outputs/${experiment}/${now:%Y-%m-%d_%H%M%S}/
+  sweep:
+    dir: /gdrive/MyDrive/shopee_dataset/outputs/${experiment}/multirun/${now:%Y-%m-%gd_%H%M%S}/
 
 # Global configurations shared between different modules
 experiment: efficientnetb3
