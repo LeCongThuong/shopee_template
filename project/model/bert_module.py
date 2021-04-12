@@ -1,4 +1,3 @@
-import pytorch_lightning as pl
 import hydra
 from transformers import AutoModel
 from .base_model import BaseModel
