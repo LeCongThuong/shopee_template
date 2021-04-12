@@ -42,7 +42,7 @@ class BaseModel(pl.LightningModule):
                 images_batch, title_ids, attention_masks, _ = self.extract_input(batch)
                 images_batch, title_ids, attention_masks = images_batch.to(device=device), title_ids.to(device=device), attention_masks.to(device)
                 image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
-            embedding_list.append(image_text_embedding)
+            embedding_list.append(image_embedding)
         return embedding_list
 
     def process_csv_file(self, csv_file, test_mode=False):
