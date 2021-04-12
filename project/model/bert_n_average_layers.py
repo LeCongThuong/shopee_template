@@ -5,8 +5,8 @@ from .base_model import BaseModel
 import torch
 
 
-class AverageNLayerBertModel(BertBaseCaseModel):
-    def __init__(self, optim, loss, model_name='bert-base-uncased', n_average_layers=4, **kwargs):
+class AverageNLayerBertModel(BaseModel):
+    def __init__(self,model_name='bert-base-uncased', n_average_layers=4, **kwargs):
         super().__init__()
         self.save_hyperparameters()
         self.n_average_layers = n_average_layers
@@ -29,3 +29,31 @@ class AverageNLayerBertModel(BertBaseCaseModel):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
         image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
         return image_text_embedding, image_embedding, text_embedding, label_group
+
+    def get_loss_funcs(self):
+        loss_func = hydra.utils.instantiate(self.hparams.loss.loss_func)
+        mining_func = hydra.utils.instantiate(self.hparams.loss.mining_func)
+        return loss_func, mining_func
+
+    def training_step(self,  batch, batch_idx, **kargs):
+        image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
+        text_indices_tuple = self.mining_func(text_embeddings, label_group)
+        loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
+        self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
+        output = {"loss": loss}
+        return output
+
+    def configure_optimizers(self):
+        optim = hydra.utils.instantiate(self.hparams.optim, self.parameters())
+        return optim
+
+    def extract_input(self, batch):
+        images = batch["images"]
+        title_ids = batch["title_ids"]
+        label_groups = batch.get("label_groups", None)
+        attention_masks = batch["attention_masks"]
+        return images, title_ids, attention_masks, label_groups
+
+    def load_model(self, checkpoint_path):
+        model = BertBaseCaseModel.load_from_checkpoint(checkpoint_path)
+        return model

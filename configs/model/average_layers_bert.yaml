@@ -3,4 +3,4 @@ name: average_bert
 
 _target_: project.model.AverageNLayerBertModel
 model_name: 'bert-base-uncased'
- n_average_layers: 4
+n_average_layers: 4
