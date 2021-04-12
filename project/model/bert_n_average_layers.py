@@ -6,7 +6,7 @@ import torch
 
 
 class AverageNLayerBertModel(BertBaseCaseModel):
-    def __init__(self, model_name='bert-base-uncased', n_average_layers=4, **kwargs):
+    def __init__(self, optim, loss, model_name='bert-base-uncased', n_average_layers=4, **kwargs):
         super().__init__()
         self.save_hyperparameters()
         self.n_average_layers = n_average_layers
