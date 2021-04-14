@@ -20,7 +20,7 @@ class ResizerEfficientnetEmbeddingExtractor(EfficientNetImageEmbedding):
         out = self.resizer(image)
         out = self.base_model.forward_features(out)
         out = self.embedding_extractor(out)
-        return out, None, None
+        return None, out, None
 
     def configure_optimizers(self):
         base_optim = hydra.utils.instantiate(self.hparams.optim.base, self.base_model.parameters())

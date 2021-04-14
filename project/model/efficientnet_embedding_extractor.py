@@ -24,7 +24,7 @@ class EfficientNetImageEmbedding(BaseModel):
                 ):
         out = self.base_model.forward_features(image)
         out = self.embedding_extractor(out)
-        return out, None, None
+        return None, out, None
 
     def _step(self, batch):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
