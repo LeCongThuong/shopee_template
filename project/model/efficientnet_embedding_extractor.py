@@ -34,7 +34,7 @@ class EfficientNetImageEmbedding(BaseModel):
     def training_step(self, batch, batch_idx,optimizer_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
         image_indices_tuple = self.mining_func(image_embeddings, label_group)
-        loss = self.loss_func(image_text_embeddings, label_group, image_indices_tuple)
+        loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         output = {"loss": loss}
         return output
