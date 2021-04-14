@@ -3,12 +3,12 @@ name: image_augment
 
 train:
   _target_: project.augmentation.TorchAug
-  height: 260
-  width: 260
+  height: 448
+  width: 448
 val:
   _target_: project.augmentation.DefaultAug
-  height: 260
-  width: 260
+  height: 448
+  width: 448
 test:
   _target_: project.augmentation.DefaultAug
   height: 260

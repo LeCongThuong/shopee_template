@@ -7,7 +7,7 @@ hydra:
     dir: /gdrive/MyDrive/shopee_dataset/outputs/${experiment}/multirun/${now:%Y-%m-%d_%H%M%S}/
 
 # Global configurations shared between different modules
-experiment: efficientnetb3
+experiment: resizer_efficient_embedding_extractor
 
 # Composing nested config with default
 defaults:
