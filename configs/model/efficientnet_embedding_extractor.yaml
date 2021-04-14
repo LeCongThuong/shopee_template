@@ -1,7 +1,7 @@
 # @package model
-name: efficientnetb0_bert
+name: efficientnet_embedding_extractor
 
 _target_: project.model.EfficientNetImageEmbedding
-arch: 'efficientnet-b3'
+arch: efficientnet_b3
 out_feature: 512
 dropout_ratio: 0.2

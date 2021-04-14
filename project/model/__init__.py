@@ -2,3 +2,4 @@ from .baseline_efficientnet_bert import BaselineModel, BaseModel
 from .efficientnet import EfficientnetExtractor
 from .efficientnet_resizer import ResizeEfficientnet
 from .efficientnet_embedding_extractor import EfficientNetImageEmbedding
+from .resizer_efficientnet_embedding_extractor import ResizerEfficientnetEmbeddingExtractor

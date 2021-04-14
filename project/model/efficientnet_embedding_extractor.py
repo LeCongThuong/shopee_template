@@ -14,7 +14,7 @@ class EfficientNetImageEmbedding(BaseModel):
             nn.AdaptiveAvgPool2d(output_size=1),
             nn.Dropout(p=dropout_ratio, inplace=False),
             nn.Flatten(),
-            nn.Linear(self.model.classifier.in_features, out_feature),
+            nn.Linear(self.base_model.classifier.in_features, out_feature),
         )
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
@@ -31,10 +31,10 @@ class EfficientNetImageEmbedding(BaseModel):
         image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
         return image_text_embedding, image_embedding, text_embedding, label_group
 
-    def training_step(self, batch, batch_idx, **kargs):
+    def training_step(self, batch, batch_idx,optimizer_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
-        image_text_indices_tuple = self.mining_func(image_text_embeddings, label_group)
-        loss = self.loss_func(image_text_embeddings, label_group, image_text_indices_tuple)
+        image_indices_tuple = self.mining_func(image_embeddings, label_group)
+        loss = self.loss_func(image_text_embeddings, label_group, image_indices_tuple)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         output = {"loss": loss}
         return output

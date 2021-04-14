@@ -2,7 +2,7 @@
 
 train:
   _target_: project.data.ShopeeDatasetLoader
-  batch_size: 64
+  batch_size: 96
   dataset: ???
   sampler: ???
 
