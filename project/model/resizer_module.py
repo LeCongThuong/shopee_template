@@ -58,7 +58,7 @@ class ResizingNetwork(nn.Module):
         self.conv4 = nn.Conv2d(n, out_channels=3, kernel_size=7, stride=1, padding=3)
 
     def forward(self, x):
-        residual = F.interpolate(x, size=self.image_size, mode='bilinear')
+        residual = F.interpolate(x, size=self.image_size, mode='bilinear', align_corners=False)
 
         out = self.conv1(x)
         out = self.leakyrelu1(out)
@@ -67,7 +67,7 @@ class ResizingNetwork(nn.Module):
         out = self.leakyrelu2(out)
         out = self.bn1(out)
 
-        out_residual = F.interpolate(out, size=self.image_size, mode='bilinear')
+        out_residual = F.interpolate(out, size=self.image_size, mode='bilinear', align_corners=False)
 
         out = self.resblock(out_residual)
 
