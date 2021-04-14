@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="configs", config_name="defaults")
 def main(cfg: DictConfig) -> None:
-
+    torch.backends.cudnn.benchmark = True
     pl.seed_everything(cfg.general.seed)
     device = torch.device("cuda")
     logger.info("\n" + OmegaConf.to_yaml(cfg))
