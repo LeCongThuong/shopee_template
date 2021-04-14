@@ -24,7 +24,7 @@ class EfficientNetImageEmbedding(BaseModel):
                 ):
         out = self.base_model.forward_features(image)
         out = self.embedding_extractor(out)
-        return out, None, None
+        return None, out, None
 
     def _step(self, batch):
         images_batch, title_ids, attention_masks, label_group = self.extract_input(batch)
@@ -33,8 +33,8 @@ class EfficientNetImageEmbedding(BaseModel):
 
     def training_step(self, batch, batch_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
-        image_text_indices_tuple = self.mining_func(image_text_embeddings, label_group)
-        loss = self.loss_func(image_text_embeddings, label_group, image_text_indices_tuple)
+        image_indices_tuple = self.mining_func(image_embeddings, label_group)
+        loss = self.loss_func(image_text_embeddings, label_group, image_indices_tuple)
         self.log("loss/train", loss, prog_bar=True, logger=True, on_step=True, on_epoch=True)
         output = {"loss": loss}
         return output
