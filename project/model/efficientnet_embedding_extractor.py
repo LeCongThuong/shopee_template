@@ -14,7 +14,7 @@ class EfficientNetImageEmbedding(BaseModel):
             nn.AdaptiveAvgPool2d(output_size=1),
             nn.Dropout(p=dropout_ratio, inplace=False),
             nn.Flatten(),
-            nn.Linear(self.model.classifier.in_features, out_feature),
+            nn.Linear(self.base_model.classifier.in_features, out_feature),
         )
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
