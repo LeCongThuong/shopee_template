@@ -31,7 +31,7 @@ class EfficientNetImageEmbedding(BaseModel):
         image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
         return image_text_embedding, image_embedding, text_embedding, label_group
 
-    def training_step(self, batch, batch_idx, **kargs):
+    def training_step(self, batch, batch_idx, optimizer_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
         image_indices_tuple = self.mining_func(image_embeddings, label_group)
         loss = self.loss_func(image_embeddings, label_group, image_indices_tuple)
