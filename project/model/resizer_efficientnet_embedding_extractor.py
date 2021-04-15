@@ -27,3 +27,7 @@ class ResizerEfficientnetEmbeddingExtractor(EfficientNetImageEmbedding):
         in_params = hydra.utils.instantiate(self.hparams.optim.head, self.resizer.parameters())
         head_optim = hydra.utils.instantiate(self.hparams.optim.head, self.embedding_extractor.parameters())
         return base_optim, head_optim, in_params
+
+    def load_model(self, checkpoint_path):
+        model = ResizerEfficientnetEmbeddingExtractor.load_from_checkpoint(checkpoint_path)
+        return model
