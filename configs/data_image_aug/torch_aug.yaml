@@ -5,6 +5,7 @@ train:
   _target_: project.augmentation.TorchAug
   height: 260
   width: 260
+  gray_image: false
 val:
   _target_: project.augmentation.DefaultAug
   height: 260
