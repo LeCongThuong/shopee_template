@@ -64,6 +64,24 @@ def main(cfg: DictConfig) -> None:
     # for restore continue training
     # trainer = Trainer(resume_from_checkpoint='some/path/to/my_checkpoint.ckpt')
     # model_module.predict_test_dataset(test_loader, test_csv_path, output_file_path, threshold, device)
+
+    # trainer = pl.Trainer(
+    #     resume_from_checkpoint='/gdrive/MyDrive/shopee_dataset/outputs/efficientnetb3_image_extractor/2021-04-15_155807/checkpoints/last.ckpt',
+    #     logger=tensorboard,
+    #     callbacks=callbacks,
+    #     **cfg.trainer
+    # )
+    # os.makedirs(cfg.general.result_dir, exist_ok=True)
+    # # lr_finder = trainer.tuner.lr_find(model_module, train_dataloader=train_loader)
+    # # suggested_lr = lr_finder.suggestion()
+    # # print("Suggest: ", suggested_lr)
+    # model_module = model_module.load_model(checkpoint_path='/gdrive/MyDrive/shopee_dataset/outputs/efficientnetb3_image_extractor/2021-04-15_155807/checkpoints/last.ckpt')
+    # trainer.fit(model_module, train_dataloader=train_loader)
+    # model_module.evaluate_train_dataset(val_loader, cfg.data_dataset.val.csv_file, cfg.general.threshold, device)
+    # model_module.visual_similar_image_result(val_loader, cfg.data_dataset.val.csv_file, cfg.general.threshold, device,
+    #                                          cfg.data_dataset.train.image_dir, cfg.general.result_dir, num_image=50, k_show=6)
+
+
 if __name__ == "__main__":
     main()
 
