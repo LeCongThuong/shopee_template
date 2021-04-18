@@ -11,6 +11,7 @@ class AverageNLayerBertModel(BaseModel):
         self.save_hyperparameters()
         self.n_average_layers = n_average_layers
         self.model = AutoModel.from_pretrained(model_name,  output_hidden_states=True)
+        self.model.train()
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image, input_ids, attention_mask=None):
@@ -55,5 +56,5 @@ class AverageNLayerBertModel(BaseModel):
         return images, title_ids, attention_masks, label_groups
 
     def load_model(self, checkpoint_path):
-        model = BertBaseCaseModel.load_from_checkpoint(checkpoint_path)
+        model = AverageNLayerBertModel.load_from_checkpoint(checkpoint_path)
         return model

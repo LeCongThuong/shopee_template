@@ -8,6 +8,7 @@ class BertBaseCaseModel(BaseModel):
         super().__init__()
         self.save_hyperparameters()
         self.model = AutoModel.from_pretrained(model_name)
+        self.model.train()
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image, input_ids, attention_mask=None):

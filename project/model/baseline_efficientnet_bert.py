@@ -65,6 +65,7 @@ class BertBaseCaseModel(pl.LightningModule):
     def __init__(self, model_name='bert-base-uncased'):
         super().__init__()
         self.model = AutoModel.from_pretrained(model_name)
+        self.model.train()
 
     def forward(self, input_ids, attention_mask=None):
         return self.model(input_ids=input_ids, attention_mask=attention_mask)[1]
