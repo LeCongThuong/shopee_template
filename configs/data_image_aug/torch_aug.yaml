@@ -3,17 +3,17 @@ name: image_augment
 
 train:
   _target_: project.augmentation.TorchAug
-  height: 260
-  width: 260
+  height: 300
+  width: 300
   gray_image: false
   gray_prob: 1
 val:
   _target_: project.augmentation.DefaultAug
-  height: 260
-  width: 260
+  height: 300
+  width: 300
   gray_image: false
   gray_prob: 1
 test:
   _target_: project.augmentation.DefaultAug
-  height: 260
-  width: 260
+  height: 300
+  width: 300
