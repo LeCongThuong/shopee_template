@@ -3,15 +3,29 @@ import hydra
 from transformers import AutoModel
 from .base_model import BaseModel
 import torch
+import pytorch_lightning as pl
+
+
+class AverageVetorModule(pl.LightningModule):
+    def __init__(self, n_layers):
+        super(AverageVetorModule, self).__init__()
+        self.weights = torch.nn.Parameter(torch.randn(n_layers,),  requires_grad=True)
+        self.n_layers = n_layers
+
+    def forward(self, embedding):
+        for i in range(self.n_layers):
+            embedding[:, i, :] = embedding[:, i, :] * self.weights[i]
+        return torch.mean(embedding, dim=1)
 
 
 class AverageNLayerBertModel(BaseModel):
-    def __init__(self,model_name='bert-base-uncased', n_average_layers=4, **kwargs):
+    def __init__(self, model_name='bert-base-uncased', n_average_layers=4, **kwargs):
         super().__init__()
         self.save_hyperparameters()
         self.n_average_layers = n_average_layers
         self.model = AutoModel.from_pretrained(model_name,  output_hidden_states=True)
         self.model.train()
+        self.average_vector = AverageVetorModule(n_average_layers)
         self.loss_func, self.mining_func = self.get_loss_funcs()
 
     def forward(self, image, input_ids, attention_mask=None):
@@ -23,7 +37,7 @@ class AverageNLayerBertModel(BaseModel):
         hidden_layers = torch.stack(hidden_states, dim=0)
         hidden_layers = hidden_layers.permute(1, 0, 2, 3)
         n_last_layers = hidden_layers[:, -self.n_average_layers:, 0, :]
-        cls_embedding = torch.mean(n_last_layers, dim=1)
+        cls_embedding = self.average_vector(n_last_layers)
         return cls_embedding
 
     def _step(self, batch):
