@@ -2,9 +2,17 @@
 
 base:
   _target_: torch.optim.Adam
-  lr: 3e-5
+  lr: e-4
   weight_decay: 4e-4
 head:
   _target_: torch.optim.Adam
-  lr: 3e-4
+  lr: 5e-4
   weight_decay: 4e-4
+base_lr_scheduler:
+  _target_:  torch.optim.lr_scheduler.MultiStepLR
+  milestones: [50, 100, 150]
+  gamma: 0.5
+head_lr_scheduler:
+  _target_:  torch.optim.lr_scheduler.MultiStepLR
+  milestones: [50, 100, 150, 200]
+  gamma: 0.5

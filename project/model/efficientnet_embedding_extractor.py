@@ -54,7 +54,9 @@ class EfficientNetImageEmbedding(BaseModel):
     def configure_optimizers(self):
         base_optim = hydra.utils.instantiate(self.hparams.optim.base, self.base_model.parameters())
         head_optim = hydra.utils.instantiate(self.hparams.optim.head, self.embedding_extractor.parameters())
-        return base_optim, head_optim
+        base_lr_scheduler = hydra.utils.instantiate(self.hparams.optim.base_lr_scheduler, base_optim)
+        head_lr_scheduler = hydra.utils.instantiate(self.hparams.optim.head_lr_scheduler, head_optim)
+        return [base_optim, head_optim], [{'scheduler': base_lr_scheduler, 'name': 'base_lr_scheduler'}, {'scheduler': head_lr_scheduler, 'name': 'head_lr_scheduler'}]
 
     def load_model(self, checkpoint_path):
         model = EfficientNetImageEmbedding.load_from_checkpoint(checkpoint_path)
