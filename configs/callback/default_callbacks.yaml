@@ -13,3 +13,7 @@ early_stop:
   _target_: pytorch_lightning.callbacks.early_stopping.EarlyStopping
   monitor: loss/train_step
   patience: 50
+
+lr_monitor:
+  _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  logging_interval: 'epoch'

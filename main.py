@@ -45,7 +45,8 @@ def main(cfg: DictConfig) -> None:
     # ]
     callbacks = [
         hydra.utils.instantiate(cfg.callback.model_checkpoint),
-        hydra.utils.instantiate(cfg.callback.early_stop)
+        hydra.utils.instantiate(cfg.callback.early_stop),
+        hydra.utils.instantiate(cfg.callback.lr_monitor)
     ]
 
     trainer = pl.Trainer(
