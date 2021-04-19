@@ -10,7 +10,7 @@ head:
   weight_decay: 4e-4
 base_lr_scheduler:
   _target_:  torch.optim.lr_scheduler.MultiStepLR
-  milestones: [50, 100, 150]
+  milestones: [50, 100, 150, 200]
   gamma: 0.5
 head_lr_scheduler:
   _target_:  torch.optim.lr_scheduler.MultiStepLR
