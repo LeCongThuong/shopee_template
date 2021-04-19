@@ -2,5 +2,5 @@
 name: average_bert
 
 _target_: project.model.AverageNLayerBertModel
-model_name: 'bert-base-uncased'
+model_name: 'xlm-roberta-large'
 n_average_layers: 4

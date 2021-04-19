@@ -9,13 +9,12 @@ import pytorch_lightning as pl
 class AverageVetorModule(pl.LightningModule):
     def __init__(self, n_layers):
         super(AverageVetorModule, self).__init__()
-        self.weights = torch.nn.Parameter(torch.randn(n_layers,),  requires_grad=True)
+        self.weights = torch.nn.Parameter(torch.randn(1, n_layers,1),  requires_grad=True)
         self.n_layers = n_layers
 
     def forward(self, embedding):
-        for i in range(self.n_layers):
-            embedding[:, i, :] = embedding[:, i, :] * self.weights[i]
-        return torch.mean(embedding, dim=1)
+        out = embedding*self.weights
+        return torch.mean(out, dim=1)
 
 
 class AverageNLayerBertModel(BaseModel):
