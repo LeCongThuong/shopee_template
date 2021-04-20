@@ -7,6 +7,8 @@ train:
   width: 300
   gray_image: false
   gray_prob: 1
+  eraser_aug: false
+  eraser_prob: 0.3
 val:
   _target_: project.augmentation.DefaultAug
   height: 300
