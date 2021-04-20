@@ -9,12 +9,12 @@ import pytorch_lightning as pl
 class AverageVetorModule(pl.LightningModule):
     def __init__(self, n_layers):
         super(AverageVetorModule, self).__init__()
-        self.weights = torch.nn.Parameter(torch.randn(1, n_layers,1),  requires_grad=True)
+        self.weights = torch.nn.Parameter(torch.rand(1, n_layers, 1),  requires_grad=True)
         self.n_layers = n_layers
 
     def forward(self, embedding):
         out = embedding*self.weights
-        return torch.mean(out, dim=1)
+        return torch.sum(out, dim=1)
 
 
 class AverageNLayerBertModel(BaseModel):
@@ -49,7 +49,7 @@ class AverageNLayerBertModel(BaseModel):
         mining_func = hydra.utils.instantiate(self.hparams.loss.mining_func)
         return loss_func, mining_func
 
-    def training_step(self,  batch, batch_idx, **kargs):
+    def training_step(self,  batch, batch_idx, optimizer_idx, **kargs):
         image_text_embeddings, image_embeddings, text_embeddings, label_group = self._step(batch)
         text_indices_tuple = self.mining_func(text_embeddings, label_group)
         loss = self.loss_func(text_embeddings, label_group, text_indices_tuple)
@@ -58,8 +58,12 @@ class AverageNLayerBertModel(BaseModel):
         return output
 
     def configure_optimizers(self):
-        optim = hydra.utils.instantiate(self.hparams.optim, self.parameters())
-        return optim
+        # optim = hydra.utils.instantiate(self.hparams.optim, self.parameters())
+        base_optim = torch.optim.Adam(self.model, lr=1e-4)
+        head_optim = torch.optim.Adam(self.average_vector, lr=1e-3)
+        base_lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(base_optim.parameters(), milestones=[50, 100], gamma=0.1)
+        head_lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(head_optim.parameters(), milestones=[30, 60, 90, 120], gamma=0.5)
+        return [base_optim, head_optim], [base_lr_scheduler, head_lr_scheduler]
 
     def extract_input(self, batch):
         images = batch["images"]
