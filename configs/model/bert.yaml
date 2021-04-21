@@ -2,4 +2,4 @@
 name: bert
 
 _target_: project.model.BertBaseCaseModel
-model_name: 'bert-base-uncased'
+model_name: 'roberta-large'

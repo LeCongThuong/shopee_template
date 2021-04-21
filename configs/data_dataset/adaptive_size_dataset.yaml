@@ -7,7 +7,7 @@ train:
   transform: ${data_image_aug.train}
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
-  tokenizer_str: 'xlm-roberta-large'
+  tokenizer_str: 'roberta-large'
   text_max_length: 22
   text_padding: 'max_length'
   is_truncate: True
@@ -19,7 +19,7 @@ val:
   transform: ${data_image_aug.val}
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
-  tokenizer_str: 'xlm-roberta-large'
+  tokenizer_str: 'roberta-large'
   text_max_length: 22
   text_padding: 'max_length'
   is_truncate: True
@@ -31,7 +31,7 @@ test:
   transform: ${data_image_aug.test}
   text_preprocess:
     _target_: project.text_preprocess.TextProcessing
-  tokenizer_str: 'xlm-roberta-large'
+  tokenizer_str: 'roberta-large'
   text_max_length: 22
   text_padding: 'max_length'
   is_truncate: True
