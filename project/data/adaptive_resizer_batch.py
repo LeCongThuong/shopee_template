@@ -79,7 +79,7 @@ class ShopeeDatasetLoader:
         self.sampler = sampler
 
     def get_dataloader(self):
-        return DataLoader(self.dataset, sampler=self.sampler, batch_size=self.batch_size, pin_memory=True)
+        return DataLoader(self.dataset, sampler=self.sampler, batch_size=self.batch_size, pin_memory=True, num_workers=4)
 
     # def get_sampler(self, sampler_str, dataset):
     #     if sampler_str == 'random':
