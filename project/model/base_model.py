@@ -177,7 +177,7 @@ class BaseModel(pl.LightningModule):
             for i, ch in enumerate(title):
                 title_with_return += ch
                 if (i != 0) & (i % 20 == 0): title_with_return += '\n'
-            ax[2][idx].set_title(f"{str(dist)}\n {title}", fontsize=7)
+            ax[2][idx].set_title(f"{str(dist)}\n {title_with_return}", fontsize=7)
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()

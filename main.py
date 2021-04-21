@@ -44,7 +44,7 @@ def main(cfg: DictConfig) -> None:
     #     pl.callbacks.EarlyStopping(monitor='loss/train_step', patience=50),
     # ]
     callbacks = [
-        hydra.utils.instantiate(cfg.callback.model_checkpoint),
+        hydra.utils.instantiate(cfg.callback.model_checkpoint),git
         hydra.utils.instantiate(cfg.callback.lr_monitor)
     ]
 
