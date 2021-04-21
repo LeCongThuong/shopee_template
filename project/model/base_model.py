@@ -125,7 +125,7 @@ class BaseModel(pl.LightningModule):
         n = len(np.intersect1d(neighbor_pred, target))
         return 2 * n / (len(neighbor_pred) + len(target))
 
-    def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6):
+    def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=7):
         self.to(device)
         if os.path.isfile('embedding.plk'):
             with open('embedding.plk', 'rb') as f :
@@ -159,7 +159,7 @@ class BaseModel(pl.LightningModule):
         file_path = os.path.join(result_dir, f"{chosen_post_id}.jpg")
         query_image = post_image_dict[chosen_post_id]
         query_image = plt.imread(os.path.join(image_source, query_image))
-        fig, ax = plt.subplots(nrows=3, ncols=k_show + 1, figsize=(12, 8))
+        fig, ax = plt.subplots(nrows=3, ncols=k_show + 1, figsize=(20, 5))
         np.vectorize(lambda ax: ax.axis('off'))(ax)
         ax[0][0].imshow(query_image)
         for idx, target in enumerate(target_list):
