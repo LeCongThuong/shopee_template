@@ -7,6 +7,7 @@ import faiss
 from tqdm import tqdm
 import os
 import matplotlib.pyplot as plt
+import pickle
 
 
 class BaseModel(pl.LightningModule):
@@ -25,6 +26,9 @@ class BaseModel(pl.LightningModule):
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
         self.to(device)
         embedding_list = self.get_all_embeddings(val_dataloader, device)
+        with open('embedding.plk', 'w') as f:
+            pickle.dump(embedding_list, f)
+        print("Done dump pickle file")
         posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
         k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
         f1_score = self.get_f1_dice_score(target_list, k_post_neighbor_pred_list)
@@ -123,7 +127,11 @@ class BaseModel(pl.LightningModule):
 
     def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6):
         self.to(device)
-        embedding_list = self.get_all_embeddings(dataloader, device)
+        if os.path.isfile('embedding.plk'):
+            with open('embedding.plk', 'r') as f :
+                embedding_list = pickle.load(f)
+        else:
+            embedding_list = self.get_all_embeddings(dataloader, device)
         posting_id_list, image_list, title_list, target_list = self.process_csv_file_for_visualization(csv_file, test_mode=False)
 
         post_image_dict = dict(zip(posting_id_list, image_list))
@@ -138,14 +146,14 @@ class BaseModel(pl.LightningModule):
         # chosen_image_list = [os.path.join(image_source, image_name) for image_name in image_list[chosen_postion_list]]
         chosen_target_list = target_list[chosen_postion_list]
         chosen_pred_list = k_post_neighbor_pred_list[chosen_postion_list]
-        chosen_k_distance = k_post_neighbor_pred_list[chosen_postion_list]
+        chosen_k_distance = k_dist_list[chosen_postion_list]
 
         for i in range(num_image):
             chosen_post = chosen_posting_id_list[i]
             target_list = chosen_target_list[i][:k_show + 1]
             pred_list = chosen_pred_list[i][:k_show + 1]
-            k_dist_list = chosen_k_distance[i][k_show + 1]
-            self.visualize_result(chosen_post, post_image_dict, post_title_dict, target_list, pred_list, k_dist_list, image_source, result_dir, k_show)
+            k_dists = chosen_k_distance[i][:k_show + 1]
+            self.visualize_result(chosen_post, post_image_dict, post_title_dict, target_list, pred_list, k_dists, image_source, result_dir, k_show)
 
     def visualize_result(self, chosen_post_id, post_image_dict, post_title_dict, target_list, pred_list, k_dist_list, image_source, result_dir, k_show):
         file_path = os.path.join(result_dir, f"{chosen_post_id}.jpg")
@@ -165,7 +173,7 @@ class BaseModel(pl.LightningModule):
             dist = k_dist_list[idx]
             pred_image = plt.imread(os.path.join(image_source, image_path))
             ax[2][idx].imshow(pred_image)
-            ax[2][idx].set_title(f"{str(dist)}\n {title[:30]}")
+            ax[2][idx].set_title(f"{str(dist)}\n {title[:30]}", fontsize=7)
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
