@@ -2,6 +2,6 @@
 name: efficientnetb0_bert
 
 _target_: project.model.EfficientNetImageEmbedding
-arch: 'efficientnet_b3'
+arch: 'efficientnet_v2s'
 out_feature: 512
 dropout_ratio: 0.2

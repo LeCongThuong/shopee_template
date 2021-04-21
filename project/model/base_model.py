@@ -26,7 +26,7 @@ class BaseModel(pl.LightningModule):
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
         self.to(device)
         embedding_list = self.get_all_embeddings(val_dataloader, device)
-        with open('embedding.plk', 'w') as f:
+        with open('embedding.plk', 'wb') as f:
             pickle.dump(embedding_list, f)
         print("Done dump pickle file")
         posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
@@ -128,7 +128,7 @@ class BaseModel(pl.LightningModule):
     def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6):
         self.to(device)
         if os.path.isfile('embedding.plk'):
-            with open('embedding.plk', 'r') as f :
+            with open('embedding.plk', 'rb') as f :
                 embedding_list = pickle.load(f)
         else:
             embedding_list = self.get_all_embeddings(dataloader, device)
@@ -173,7 +173,11 @@ class BaseModel(pl.LightningModule):
             dist = k_dist_list[idx]
             pred_image = plt.imread(os.path.join(image_source, image_path))
             ax[2][idx].imshow(pred_image)
-            ax[2][idx].set_title(f"{str(dist)}\n {title[:30]}", fontsize=7)
+            title_with_return = ""
+            for i, ch in enumerate(title):
+                title_with_return += ch
+                if (i != 0) & (i % 20 == 0): title_with_return += '\n'
+            ax[2][idx].set_title(f"{str(dist)}\n {title}", fontsize=7)
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
