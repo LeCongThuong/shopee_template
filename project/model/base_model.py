@@ -60,13 +60,14 @@ class BaseModel(pl.LightningModule):
         df = read_csv(csv_file)
         posting_id_list = df['posting_id'].to_numpy()
         image_list = df['image'].to_list()
+        image_title = df['title'].to_list()
         if test_mode:
             return posting_id_list, None
         if 'target' not in df.columns:
             target_dict = df.groupby('label_group').posting_id.agg('unique').to_dict()
             df['target'] = df.label_group.map(target_dict)
         target_list = df['target'].to_numpy()
-        return posting_id_list, image_list, target_list
+        return posting_id_list, image_list, image_title, target_list
 
     def predict_test_dataset(self, test_dataloader, csv_file, output_file_path, threshold, device) -> None:
         self.to(device)
@@ -81,7 +82,7 @@ class BaseModel(pl.LightningModule):
         df = pd.DataFrame(submit_dict, columns=['posting_id', 'matches'])
         df.to_csv(output_file_path, index=False)
 
-    def get_k_neighbors(self, embeddings, posting_ids_list, threshold=0.8):
+    def get_k_neighbors(self, embeddings, posting_ids_list, threshold=0.8, return_dist=False):
         embeddings = torch.cat(embeddings)
         embeddings = embeddings.detach().cpu().numpy()
         embedding_num, D = embeddings.shape
@@ -92,10 +93,17 @@ class BaseModel(pl.LightningModule):
         dists, ids = gpu_index.search(embeddings, 50)
         boolean_k_neighbors = dists > threshold
         k_neighbor_list = []
+        if return_dist:
+            k_dist_list = []
         for i in range(embedding_num):
             k_neighbor_position = ids[i][boolean_k_neighbors[i]]
+            if return_dist:
+                k_dist = dists[i][boolean_k_neighbors[i]]
+                k_dist_list.append(k_dist)
             k_neighbor_list.append(np.take(posting_ids_list, k_neighbor_position))
         k_neighbor_pred = np.array(k_neighbor_list)
+        if return_dist:
+            return k_neighbor_pred, np.array(k_dist_list)
         return k_neighbor_pred
 
     def get_f1_dice_score(self, targets, neighbor_preds):
@@ -116,11 +124,12 @@ class BaseModel(pl.LightningModule):
     def visual_similar_image_result(self, dataloader, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6):
         self.to(device)
         embedding_list = self.get_all_embeddings(dataloader, device)
-        posting_id_list, image_list, target_list = self.process_csv_file_for_visualization(csv_file, test_mode=False)
+        posting_id_list, image_list, title_list, target_list = self.process_csv_file_for_visualization(csv_file, test_mode=False)
 
         post_image_dict = dict(zip(posting_id_list, image_list))
+        post_title_dict = dict(zip(posting_id_list, title_list))
 
-        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
+        k_post_neighbor_pred_list, k_dist_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold, return_dist=True)
         chosen_postion_list = np.random.choice(len(posting_id_list), num_image, replace=False)
         chosen_posting_id_list = posting_id_list[chosen_postion_list]
         # chosen_image_list = []
@@ -129,18 +138,20 @@ class BaseModel(pl.LightningModule):
         # chosen_image_list = [os.path.join(image_source, image_name) for image_name in image_list[chosen_postion_list]]
         chosen_target_list = target_list[chosen_postion_list]
         chosen_pred_list = k_post_neighbor_pred_list[chosen_postion_list]
+        chosen_k_distance = k_post_neighbor_pred_list[chosen_postion_list]
 
         for i in range(num_image):
             chosen_post = chosen_posting_id_list[i]
-            target_list = chosen_target_list[i][:k_show]
+            target_list = chosen_target_list[i][:k_show + 1]
             pred_list = chosen_pred_list[i][:k_show + 1]
-            self.visualize_result(chosen_post, post_image_dict, target_list, pred_list, image_source, result_dir, k_show)
+            k_dist_list = chosen_k_distance[i][k_show + 1]
+            self.visualize_result(chosen_post, post_image_dict, post_title_dict, target_list, pred_list, k_dist_list, image_source, result_dir, k_show)
 
-    def visualize_result(self, chosen_post_id, post_image_dict, target_list, pred_list, image_source, result_dir, k_show):
+    def visualize_result(self, chosen_post_id, post_image_dict, post_title_dict, target_list, pred_list, k_dist_list, image_source, result_dir, k_show):
         file_path = os.path.join(result_dir, f"{chosen_post_id}.jpg")
         query_image = post_image_dict[chosen_post_id]
         query_image = plt.imread(os.path.join(image_source, query_image))
-        fig, ax = plt.subplots(nrows=3, ncols=k_show, figsize=(12, 8))
+        fig, ax = plt.subplots(nrows=3, ncols=k_show + 1, figsize=(12, 8))
         np.vectorize(lambda ax: ax.axis('off'))(ax)
         ax[0][0].imshow(query_image)
         for idx, target in enumerate(target_list):
@@ -149,11 +160,12 @@ class BaseModel(pl.LightningModule):
             ax[1][idx].imshow(gt_image)
 
         for idx, pred in enumerate(pred_list):
-            if idx == 0:
-                continue
             image_path = post_image_dict[pred]
+            title = post_title_dict[pred]
+            dist = k_dist_list[idx]
             pred_image = plt.imread(os.path.join(image_source, image_path))
-            ax[2][idx - 1].imshow(pred_image)
+            ax[2][idx].imshow(pred_image)
+            ax[2][idx].set_title(f"{str(dist)}\n {title[:30]}")
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
