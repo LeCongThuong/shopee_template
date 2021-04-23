@@ -155,6 +155,60 @@ class BaseModel(pl.LightningModule):
             k_dists = chosen_k_distance[i][:k_show + 1]
             self.visualize_result(chosen_post, post_image_dict, post_title_dict, target_list, pred_list, k_dists, image_source, result_dir, k_show)
 
+    def visual_pred(self, query_index_id_list, csv_file, threshold, device, image_source, result_dir, num_image=50, k_show=6,
+                    dataloader=None, embedding_path=None, show_title=True, show_image=False):
+
+        if os.path.isfile(embedding_path):
+            with open(embedding_path, 'rb') as f:
+                embedding_list = pickle.load(f)
+        else:
+            embedding_list = self.get_all_embeddings(dataloader, device)
+
+        posting_id_list, image_list, title_list, target_list = self.process_csv_file_for_visualization(csv_file, test_mode=False)
+        post_image_dict = dict(zip(posting_id_list, image_list))
+        k_post_neighbor_pred_list, k_dist_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold, return_dist=True)
+        post_title_dict = dict(zip(posting_id_list, title_list))
+
+        chosen_posting_id_list = posting_id_list[query_index_id_list]
+        chosen_target_list = target_list[query_index_id_list]
+        chosen_pred_list = k_post_neighbor_pred_list[query_index_id_list]
+        chosen_k_distance = k_dist_list[query_index_id_list]
+
+        if show_title and show_image:
+            for i in range(num_image):
+                chosen_post = chosen_posting_id_list[i]
+                target_list = chosen_target_list[i][:k_show + 1]
+                pred_list = chosen_pred_list[i][:k_show + 1]
+                k_dists = chosen_k_distance[i][:k_show + 1]
+                self.visualize_result(chosen_post, post_image_dict, post_title_dict, target_list, pred_list, k_dists, image_source,
+                                      result_dir, k_show)
+        else:
+            total_str = []
+            for i in range(num_image):
+                chosen_post = chosen_posting_id_list[i]
+                total_str.append(str(chosen_post))
+                total_str.append(post_title_dict[chosen_post])
+                total_str.append("*"*10)
+                target_list = chosen_target_list[i][:k_show + 1]
+                target_title = [post_title_dict[target_id] for target_id in target_list]
+                target_post_id_title = list(zip(target_list, target_title))
+                target_title_str = [f'{str(post_id)} --- {title}'for post_id, title in target_post_id_title]
+                target_title_str = '\n'.join(target_title_str)
+                total_str.append(target_title_str)
+                total_str.append('*'*10)
+                pred_list = chosen_pred_list[i][:k_show + 1]
+                pred_title = [post_title_dict[pred_id] for pred_id in pred_list]
+                k_dists = chosen_k_distance[i][:k_show + 1]
+                pred_id_title_dist = list(zip(pred_list, k_dists, pred_title))
+                pred_id_title_dist = [f'{str(id)} --- {str(dist)} --- {title}'for id, dist, title in pred_id_title_dist]
+                pred_id_title_dist = '\n'.join(pred_id_title_dist)
+                total_str.append(pred_id_title_dist)
+                total_str.append('*' * 20)
+            total_str = '\n'.join(total_str)
+            print(total_str)
+            with open(os.path.join(result_dir, 'title_pred.txt'), 'w') as f:
+                f.write(total_str)
+
     def visualize_result(self, chosen_post_id, post_image_dict, post_title_dict, target_list, pred_list, k_dist_list, image_source, result_dir, k_show):
         file_path = os.path.join(result_dir, f"{chosen_post_id}.jpg")
         query_image = post_image_dict[chosen_post_id]
