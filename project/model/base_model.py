@@ -25,18 +25,81 @@ class BaseModel(pl.LightningModule):
 
     def evaluate_train_dataset(self, val_dataloader, csv_file, threshold, device):
         self.to(device)
-        embedding_list = self.get_all_embeddings(val_dataloader, device)
+        embedding_dict = self.get_all_embeddings(val_dataloader, device)
         with open('embedding.plk', 'wb') as f:
-            pickle.dump(embedding_list, f)
+            pickle.dump(embedding_dict, f)
         print("Done dump pickle file")
         posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
-        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_list, posting_id_list, threshold=threshold)
+        k_post_neighbor_pred_list = self.get_k_neighbors(embedding_dict, posting_id_list, threshold=threshold)
         f1_score = self.get_f1_dice_score(target_list, k_post_neighbor_pred_list)
         self.log('val/f1_score', f1_score)
         print("Validation: f1_score: ", f1_score)
         with open('f_1_score.txt', 'w') as f:
             f.write(str(f1_score))
         return f1_score
+
+    def evaluate_train_dataset(self, test_dataloader, csv_file, threshold, max_candidates, device):
+        self.to(device)
+        embedding_dict = self.get_all_embeddings(test_dataloader, device)
+        posting_id_list, target_list = self.process_csv_file(csv_file, test_mode=False)
+        with open('embedding.plk', 'wb') as f:
+            pickle.dump(embedding_dict, f)
+        print("Done dump pickle file")
+        predict = self.make_prediction_based_embeddings(embedding_dict, posting_id_list, threshold, max_candidates)
+        f1_score = self.get_f1_dice_score(target_list, predict)
+        self.log('val/f1_score', f1_score)
+        print("Validation: f1_score: ", f1_score)
+        with open('f_1_score.txt', 'w') as f:
+            f.write(str(f1_score))
+        return f1_score
+
+    def make_prediction_based_embeddings(self, embedding_dict, posting_id_list, threshold, max_candidates):
+        image_text_embeddings = embedding_dict['image_text_embedding']
+        image_embeddings = embedding_dict['image_embedding']
+        text_embeddings = embedding_dict['text_embedding']
+        image_text_dists, image_text_ids = self.calculate_dist(image_text_embeddings, max_columns=max_candidates)
+        image_dists, image_ids = self.calculate_dist(image_embeddings, max_columns=max_candidates)
+        text_dists, text_ids = self.calculate_dist(text_embeddings, max_columns=max_candidates)
+        predict = self.process_dists(image_text_dists, image_text_ids, image_dists, image_ids, text_dists, text_ids,
+                                     threshold, posting_id_list)
+        return predict
+
+    def process_dists(self, image_text_dists, image_text_ids, image_dists, image_ids, text_dists, text_ids, threshold, posting_ids_list):
+        # {"k_neighbor_id": k_neighbor_pred, "k_dist": k_dist_list}
+        k_image_text_pred_core_dict = self.predict_k_most_sim(image_text_dists, image_text_ids, posting_ids_list, threshold=threshold['image_text'][1])
+        k_text_pred_core_dict = self.predict_k_most_sim(text_dists, text_ids, posting_ids_list, threshold=threshold['text'][1])
+        k_image_pred_core_dict = self.predict_k_most_sim(image_dists, image_ids, posting_ids_list, threshold=threshold['image'][1])
+
+        k_image_text_pred_dict = self.predict_k_most_sim(image_text_dists, image_ids, posting_ids_list, threshold=threshold['image_text'][0])
+        k_text_pred_dict = self.predict_k_most_sim(text_dists, image_ids, posting_ids_list, threshold=threshold['text'][0])
+        k_image_pred_dict = self.predict_k_most_sim(text_dists, text_ids, posting_ids_list, threshold=threshold['image'][0])
+
+        text_image_ids = np.hstack([k_image_pred_dict["k_neighbor_id"], k_text_pred_dict["k_neighbor_id"]])
+        text_2_image_ids = np.hstack([k_image_text_pred_dict["k_neighbor_id"], k_text_pred_dict["k_neighbor_id"]])
+        image_2_text_ids = np.hstack([k_image_text_pred_dict["k_neighbor_id"], k_image_pred_dict["k_neighbor_id"]])
+
+        processed_image_text = self.filter_pred(k_image_text_pred_core_dict['k_neighbor_id'], text_image_ids)
+        processed_image = self.filter_pred(k_image_pred_core_dict['k_neighbor_id'], text_2_image_ids)
+        process_text = self.filter_pred(k_text_pred_core_dict['k_neighbor_id'], image_2_text_ids)
+        predict = np.hstack([processed_image_text, processed_image, process_text])
+        out = []
+        for i in range(predict.shape[0]):
+            row = np.array(list(set(predict[i])))
+            out.append(row)
+        return out
+
+    def filter_pred(self, k_neighbor_core_id, other_preds):
+        num_embedding = k_neighbor_core_id.shape[0]
+        processed_neighbor_list = []
+        for i in range(num_embedding):
+            processed_neighbor = []
+            k_neighbor_core = k_neighbor_core_id[i]
+            other_pred = set(other_preds[i])
+            for core_neighbor in k_neighbor_core:
+                if core_neighbor in other_pred:
+                    processed_neighbor.append(core_neighbor)
+            processed_neighbor_list.append(processed_neighbor)
+        return np.array(processed_neighbor_list)
 
     def get_all_embeddings(self, dataloader, device):
         embedding_list = []
@@ -48,6 +111,21 @@ class BaseModel(pl.LightningModule):
                 image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
             embedding_list.append(image_embedding)
         return embedding_list
+
+    def get_all_embeddings(self, dataloader, device):
+        image_embedding_list = []
+        text_embedding_list = []
+        image_text_embedding_list = []
+        self.eval()
+        for batch_idx, batch in enumerate(tqdm(dataloader, total=int(len(dataloader)))):
+            with torch.no_grad():
+                images_batch, title_ids, attention_masks, _ = self.extract_input(batch)
+                images_batch, title_ids, attention_masks = images_batch.to(device=device), title_ids.to(device=device), attention_masks.to(device)
+                image_text_embedding, image_embedding, text_embedding = self(images_batch, title_ids, attention_masks)
+                image_embedding_list.append(image_embedding)
+                text_embedding_list.append(text_embedding)
+                image_text_embedding_list.append(image_text_embedding)
+        return {'image_embedding': image_embedding_list, 'text_embedding': text_embedding_list, 'image_text_embedding': image_text_embedding_list}
 
     def process_csv_file(self, csv_file, test_mode=False):
         df = read_csv(csv_file)
@@ -85,6 +163,30 @@ class BaseModel(pl.LightningModule):
         submit_dict = {"posting_id": posting_id_list, "matches": k_post_neighbor_pred_list}
         df = pd.DataFrame(submit_dict, columns=['posting_id', 'matches'])
         df.to_csv(output_file_path, index=False)
+
+    def calculate_dist(self, embeddings, max_columns=50):
+        embeddings = torch.cat(embeddings)
+        embeddings = embeddings.detach().cpu().numpy()
+        embedding_num, D = embeddings.shape
+        cpu_index = faiss.IndexFlatIP(D)
+        gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
+        faiss.normalize_L2(embeddings)
+        gpu_index.add(embeddings)
+        dists, ids = gpu_index.search(embeddings, max_columns)
+        return dists, ids
+
+    def predict_k_most_sim(self, dists, ids, posting_ids_list, threshold=0.85):
+        embedding_num = dists.shape[0]
+        boolean_k_neighbors = dists > threshold
+        k_neighbor_list = []
+        k_dist_list = []
+        for i in range(embedding_num):
+            k_neighbor_position = ids[i][boolean_k_neighbors[i]]
+            k_dist = dists[i][boolean_k_neighbors[i]]
+            k_dist_list.append(k_dist)
+            k_neighbor_list.append(np.take(posting_ids_list, k_neighbor_position))
+        k_neighbor_pred = np.array(k_neighbor_list)
+        return {"k_neighbor_id": k_neighbor_pred, "k_dist": k_dist_list}
 
     def get_k_neighbors(self, embeddings, posting_ids_list, threshold=0.8, return_dist=False):
         embeddings = torch.cat(embeddings)
